@@ -1,0 +1,40 @@
+# Fichiers temporaires et de build
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backend (Java/Maven)
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/**/*.jar
+backend/**/*.war
+backend/**/*.class
+
+# Frontend (Angular/Node)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/**/*.js.map
+frontend/**/*.d.ts.map
+
+# Base de données
+*.db
+*.sqlite
+
+# Environnement
+.env
+.env.local
+.env.production
