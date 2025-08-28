@@ -2,8 +2,8 @@ package com.eventconnect.services;
 
 import com.eventconnect.entities.Evenement;
 import com.eventconnect.repositories.EvenementRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,11 +21,14 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor
-@Slf4j
 public class EvenementService {
 
+    private static final Logger log = LoggerFactory.getLogger(EvenementService.class);
     private final EvenementRepository evenementRepository;
+
+    public EvenementService(EvenementRepository evenementRepository) {
+        this.evenementRepository = evenementRepository;
+    }
 
     /**
      * Crée un nouvel événement

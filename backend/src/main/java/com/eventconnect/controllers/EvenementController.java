@@ -3,8 +3,8 @@ package com.eventconnect.controllers;
 import com.eventconnect.entities.Evenement;
 import com.eventconnect.services.EvenementService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +24,15 @@ import java.util.Optional;
  */
 @RestController
 @RequestMapping("/api/evenements")
-@RequiredArgsConstructor
-@Slf4j
 @CrossOrigin(origins = "*")
 public class EvenementController {
+
+    private static final Logger log = LoggerFactory.getLogger(EvenementController.class);
+    private final EvenementService evenementService;
+
+    public EvenementController(EvenementService evenementService) {
+        this.evenementService = evenementService;
+    }
 
     private final EvenementService evenementService;
 

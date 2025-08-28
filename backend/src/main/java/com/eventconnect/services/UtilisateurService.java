@@ -1,18 +1,22 @@
 package com.eventconnect.services;
 
+import com.eventconnect.entities.Role;
 import com.eventconnect.entities.Utilisateur;
 import com.eventconnect.repositories.UtilisateurRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service pour la gestion des utilisateurs
@@ -45,8 +49,21 @@ public class UtilisateurService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
             .username(utilisateur.getEmail())
             .password(utilisateur.getMotDePasse())
-            .authorities(new ArrayList<>()) // Pour l'instant, pas de rôles spécifiques
+            .authorities(mapRolesToAuthorities(utilisateur.getRoles()))
+            .accountExpired(false)
+            .accountLocked(!utilisateur.getActif())
+            .credentialsExpired(false)
+            .disabled(!utilisateur.getActif())
             .build();
+    }
+
+    /**
+     * Convertit les rôles en authorities Spring Security
+     */
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(List<Role> roles) {
+        return roles.stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getNom()))
+            .collect(Collectors.toList());
     }
 
     /**

@@ -57,12 +57,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Lombok pour réduire le boilerplate -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
+
 
         <!-- Tests -->
         <dependency>

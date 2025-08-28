@@ -2,9 +2,6 @@ package com.eventconnect.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,9 +16,6 @@ import java.util.List;
  */
 @Entity
 @Table(name = "evenements")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Evenement {
 
     @Id
@@ -93,6 +87,85 @@ public class Evenement {
 
     @OneToMany(mappedBy = "evenement", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reservation> reservations = new ArrayList<>();
+
+    // Constructeurs
+    public Evenement() {}
+
+    public Evenement(Long id, String titre, String description, LocalDateTime dateDebut, 
+                    LocalDateTime dateFin, String lieu, Integer placesMax, Integer placesDisponibles,
+                    BigDecimal prix, CategorieEvenement categorie, StatutEvenement statut, 
+                    String imageUrl, LocalDateTime dateCreation, LocalDateTime dateModification, 
+                    Boolean actif, Utilisateur organisateur, List<Reservation> reservations) {
+        this.id = id;
+        this.titre = titre;
+        this.description = description;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.lieu = lieu;
+        this.placesMax = placesMax;
+        this.placesDisponibles = placesDisponibles;
+        this.prix = prix;
+        this.categorie = categorie;
+        this.statut = statut;
+        this.imageUrl = imageUrl;
+        this.dateCreation = dateCreation;
+        this.dateModification = dateModification;
+        this.actif = actif;
+        this.organisateur = organisateur;
+        this.reservations = reservations;
+    }
+
+    // Getters et Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getTitre() { return titre; }
+    public void setTitre(String titre) { this.titre = titre; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public LocalDateTime getDateDebut() { return dateDebut; }
+    public void setDateDebut(LocalDateTime dateDebut) { this.dateDebut = dateDebut; }
+
+    public LocalDateTime getDateFin() { return dateFin; }
+    public void setDateFin(LocalDateTime dateFin) { this.dateFin = dateFin; }
+
+    public String getLieu() { return lieu; }
+    public void setLieu(String lieu) { this.lieu = lieu; }
+
+    public Integer getPlacesMax() { return placesMax; }
+    public void setPlacesMax(Integer placesMax) { this.placesMax = placesMax; }
+
+    public Integer getPlacesDisponibles() { return placesDisponibles; }
+    public void setPlacesDisponibles(Integer placesDisponibles) { this.placesDisponibles = placesDisponibles; }
+
+    public BigDecimal getPrix() { return prix; }
+    public void setPrix(BigDecimal prix) { this.prix = prix; }
+
+    public CategorieEvenement getCategorie() { return categorie; }
+    public void setCategorie(CategorieEvenement categorie) { this.categorie = categorie; }
+
+    public StatutEvenement getStatut() { return statut; }
+    public void setStatut(StatutEvenement statut) { this.statut = statut; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public LocalDateTime getDateCreation() { return dateCreation; }
+    public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+
+    public LocalDateTime getDateModification() { return dateModification; }
+    public void setDateModification(LocalDateTime dateModification) { this.dateModification = dateModification; }
+
+    public Boolean getActif() { return actif; }
+    public void setActif(Boolean actif) { this.actif = actif; }
+
+    public Utilisateur getOrganisateur() { return organisateur; }
+    public void setOrganisateur(Utilisateur organisateur) { this.organisateur = organisateur; }
+
+    public List<Reservation> getReservations() { return reservations; }
+    public void setReservations(List<Reservation> reservations) { this.reservations = reservations; }
 
     /**
      * Méthode appelée avant la mise à jour de l'entité

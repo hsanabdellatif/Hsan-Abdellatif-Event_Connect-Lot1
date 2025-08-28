@@ -61,6 +61,17 @@ public class SecurityConfig {
                 .requestMatchers("/api/health").permitAll()
                 // Documentation API (optionnel)
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                // Endpoints pour les organisateurs
+                .requestMatchers("/api/evenements").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
+                .requestMatchers("/api/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
+                // Gestion des événements - création, modification, suppression
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/evenements").hasAnyRole("ADMIN", "ORGANISATEUR")
+                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR")
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR")
+                // Réservations
+                .requestMatchers("/api/reservations/**").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
+                // Administration des utilisateurs
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 // Tous les autres endpoints nécessitent une authentification
                 .anyRequest().authenticated()
             )

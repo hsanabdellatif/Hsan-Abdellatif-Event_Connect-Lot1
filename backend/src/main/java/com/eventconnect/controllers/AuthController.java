@@ -5,7 +5,9 @@ import com.eventconnect.dto.JwtResponse;
 import com.eventconnect.dto.LoginRequest;
 import com.eventconnect.dto.RegisterRequest;
 import com.eventconnect.dto.UtilisateurDTO;
+import com.eventconnect.entities.Role;
 import com.eventconnect.entities.Utilisateur;
+import com.eventconnect.repositories.RoleRepository;
 import com.eventconnect.services.UtilisateurService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -17,6 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 
 /**
  * Contrôleur pour la gestion de l'authentification
@@ -33,15 +37,18 @@ public class AuthController {
     private final UtilisateurService utilisateurService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RoleRepository roleRepository;
 
     public AuthController(AuthenticationManager authenticationManager,
                          UtilisateurService utilisateurService,
                          PasswordEncoder passwordEncoder,
-                         JwtTokenProvider jwtTokenProvider) {
+                         JwtTokenProvider jwtTokenProvider,
+                         RoleRepository roleRepository) {
         this.authenticationManager = authenticationManager;
         this.utilisateurService = utilisateurService;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.roleRepository = roleRepository;
     }
 
     /**
@@ -93,6 +100,11 @@ public class AuthController {
             utilisateur.setPrenom(registerRequest.getPrenom());
             utilisateur.setEmail(registerRequest.getEmail());
             utilisateur.setMotDePasse(passwordEncoder.encode(registerRequest.getMotDePasse()));
+
+            // Assigner le rôle PARTICIPANT par défaut
+            Role participantRole = roleRepository.findByNom("PARTICIPANT")
+                .orElseThrow(() -> new RuntimeException("Erreur: Rôle PARTICIPANT non trouvé"));
+            utilisateur.setRoles(Arrays.asList(participantRole));
 
             Utilisateur savedUser = utilisateurService.creer(utilisateur);
 

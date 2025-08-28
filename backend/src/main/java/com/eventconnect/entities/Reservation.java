@@ -3,9 +3,6 @@ package com.eventconnect.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,9 +16,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "reservations", 
        uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "evenement_id"}))
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Reservation {
 
     @Id
@@ -72,6 +66,70 @@ public class Reservation {
     @JoinColumn(name = "evenement_id", nullable = false)
     @NotNull(message = "L'événement est obligatoire")
     private Evenement evenement;
+
+    // Constructeurs
+    public Reservation() {}
+
+    public Reservation(Long id, Integer nombrePlaces, BigDecimal montantTotal, 
+                      StatutReservation statut, LocalDateTime dateReservation, 
+                      LocalDateTime dateConfirmation, LocalDateTime dateAnnulation, 
+                      LocalDateTime dateModification, String codeReservation, 
+                      String commentaire, Boolean actif, Utilisateur utilisateur, 
+                      Evenement evenement) {
+        this.id = id;
+        this.nombrePlaces = nombrePlaces;
+        this.montantTotal = montantTotal;
+        this.statut = statut;
+        this.dateReservation = dateReservation;
+        this.dateConfirmation = dateConfirmation;
+        this.dateAnnulation = dateAnnulation;
+        this.dateModification = dateModification;
+        this.codeReservation = codeReservation;
+        this.commentaire = commentaire;
+        this.actif = actif;
+        this.utilisateur = utilisateur;
+        this.evenement = evenement;
+    }
+
+    // Getters et Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Integer getNombrePlaces() { return nombrePlaces; }
+    public void setNombrePlaces(Integer nombrePlaces) { this.nombrePlaces = nombrePlaces; }
+
+    public BigDecimal getMontantTotal() { return montantTotal; }
+    public void setMontantTotal(BigDecimal montantTotal) { this.montantTotal = montantTotal; }
+
+    public StatutReservation getStatut() { return statut; }
+    public void setStatut(StatutReservation statut) { this.statut = statut; }
+
+    public LocalDateTime getDateReservation() { return dateReservation; }
+    public void setDateReservation(LocalDateTime dateReservation) { this.dateReservation = dateReservation; }
+
+    public LocalDateTime getDateConfirmation() { return dateConfirmation; }
+    public void setDateConfirmation(LocalDateTime dateConfirmation) { this.dateConfirmation = dateConfirmation; }
+
+    public LocalDateTime getDateAnnulation() { return dateAnnulation; }
+    public void setDateAnnulation(LocalDateTime dateAnnulation) { this.dateAnnulation = dateAnnulation; }
+
+    public LocalDateTime getDateModification() { return dateModification; }
+    public void setDateModification(LocalDateTime dateModification) { this.dateModification = dateModification; }
+
+    public String getCodeReservation() { return codeReservation; }
+    public void setCodeReservation(String codeReservation) { this.codeReservation = codeReservation; }
+
+    public String getCommentaire() { return commentaire; }
+    public void setCommentaire(String commentaire) { this.commentaire = commentaire; }
+
+    public Boolean getActif() { return actif; }
+    public void setActif(Boolean actif) { this.actif = actif; }
+
+    public Utilisateur getUtilisateur() { return utilisateur; }
+    public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
+
+    public Evenement getEvenement() { return evenement; }
+    public void setEvenement(Evenement evenement) { this.evenement = evenement; }
 
     /**
      * Méthode appelée avant la persistance de l'entité
