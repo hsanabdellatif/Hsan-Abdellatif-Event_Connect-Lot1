@@ -3,9 +3,6 @@ package com.eventconnect.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,9 +14,6 @@ import java.time.LocalDateTime;
  * @author EventConnect Team
  * @version 2.0.0
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EvenementDTO {
 
@@ -74,25 +68,9 @@ public class EvenementDTO {
     private Integer placesDisponibles;
     private BigDecimal chiffreAffaires;
 
-    /**
-     * Constructeur pour la création (sans ID et sans champs calculés)
-     */
-    public EvenementDTO(String titre, String description, LocalDateTime dateDebut, LocalDateTime dateFin,
-                       String lieu, Integer capaciteMax, BigDecimal prixPlace, String categorie, String imageUrl) {
-        this.titre = titre;
-        this.description = description;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-        this.lieu = lieu;
-        this.capaciteMax = capaciteMax;
-        this.prixPlace = prixPlace;
-        this.categorie = categorie;
-        this.imageUrl = imageUrl;
-    }
+    // Constructeurs
+    public EvenementDTO() {}
 
-    /**
-     * Constructeur pour la lecture complète
-     */
     public EvenementDTO(Long id, String titre, String description, LocalDateTime dateDebut, LocalDateTime dateFin,
                        String lieu, Integer capaciteMax, BigDecimal prixPlace, String categorie, String imageUrl,
                        LocalDateTime dateCreation, LocalDateTime dateModification, Boolean actif,
@@ -114,6 +92,76 @@ public class EvenementDTO {
         this.placesDisponibles = placesDisponibles;
         this.chiffreAffaires = chiffreAffaires;
     }
+
+    /**
+     * Constructeur pour la création (sans ID et sans champs calculés)
+     */
+    public EvenementDTO(String titre, String description, LocalDateTime dateDebut, LocalDateTime dateFin,
+                       String lieu, Integer capaciteMax, BigDecimal prixPlace, String categorie, String imageUrl) {
+        this.titre = titre;
+        this.description = description;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.lieu = lieu;
+        this.capaciteMax = capaciteMax;
+        this.prixPlace = prixPlace;
+        this.categorie = categorie;
+        this.imageUrl = imageUrl;
+    }
+
+    /**
+     * Constructeur pour la lecture complète
+     * @see EvenementDTO#EvenementDTO(Long, String, String, LocalDateTime, LocalDateTime, String, Integer, BigDecimal, String, String, LocalDateTime, LocalDateTime, Boolean, Integer, Integer, BigDecimal)
+     */
+
+    // Getters et Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getTitre() { return titre; }
+    public void setTitre(String titre) { this.titre = titre; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public LocalDateTime getDateDebut() { return dateDebut; }
+    public void setDateDebut(LocalDateTime dateDebut) { this.dateDebut = dateDebut; }
+
+    public LocalDateTime getDateFin() { return dateFin; }
+    public void setDateFin(LocalDateTime dateFin) { this.dateFin = dateFin; }
+
+    public String getLieu() { return lieu; }
+    public void setLieu(String lieu) { this.lieu = lieu; }
+
+    public Integer getCapaciteMax() { return capaciteMax; }
+    public void setCapaciteMax(Integer capaciteMax) { this.capaciteMax = capaciteMax; }
+
+    public BigDecimal getPrixPlace() { return prixPlace; }
+    public void setPrixPlace(BigDecimal prixPlace) { this.prixPlace = prixPlace; }
+
+    public String getCategorie() { return categorie; }
+    public void setCategorie(String categorie) { this.categorie = categorie; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public LocalDateTime getDateCreation() { return dateCreation; }
+    public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+
+    public LocalDateTime getDateModification() { return dateModification; }
+    public void setDateModification(LocalDateTime dateModification) { this.dateModification = dateModification; }
+
+    public Boolean getActif() { return actif; }
+    public void setActif(Boolean actif) { this.actif = actif; }
+
+    public Integer getPlacesReservees() { return placesReservees; }
+    public void setPlacesReservees(Integer placesReservees) { this.placesReservees = placesReservees; }
+
+    public Integer getPlacesDisponibles() { return placesDisponibles; }
+    public void setPlacesDisponibles(Integer placesDisponibles) { this.placesDisponibles = placesDisponibles; }
+
+    public BigDecimal getChiffreAffaires() { return chiffreAffaires; }
+    public void setChiffreAffaires(BigDecimal chiffreAffaires) { this.chiffreAffaires = chiffreAffaires; }
 
     /**
      * Calcule la durée de l'événement en heures

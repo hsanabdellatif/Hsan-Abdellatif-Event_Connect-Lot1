@@ -3,8 +3,8 @@ package com.eventconnect.controllers;
 import com.eventconnect.entities.Utilisateur;
 import com.eventconnect.services.UtilisateurService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +20,15 @@ import java.util.Optional;
  */
 @RestController
 @RequestMapping("/api/utilisateurs")
-@RequiredArgsConstructor
-@Slf4j
 @CrossOrigin(origins = "*")
 public class UtilisateurController {
 
+    private static final Logger log = LoggerFactory.getLogger(UtilisateurController.class);
     private final UtilisateurService utilisateurService;
+
+    public UtilisateurController(UtilisateurService utilisateurService) {
+        this.utilisateurService = utilisateurService;
+    }
 
     /**
      * Crée un nouvel utilisateur
@@ -57,10 +60,13 @@ public class UtilisateurController {
     public ResponseEntity<Utilisateur> obtenirUtilisateur(@PathVariable Long id) {
         log.info("GET /api/utilisateurs/{} - Récupération de l'utilisateur", id);
         
-        Optional<Utilisateur> utilisateur = utilisateurService.trouverParId(id);
-        return utilisateur
-            .map(u -> ResponseEntity.ok().body(u))
-            .orElse(ResponseEntity.notFound().build());
+        try {
+            Utilisateur utilisateur = utilisateurService.obtenirUtilisateurParId(id);
+            return ResponseEntity.ok().body(utilisateur);
+        } catch (RuntimeException e) {
+            log.error("Utilisateur non trouvé avec l'ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
@@ -72,7 +78,7 @@ public class UtilisateurController {
         log.info("GET /api/utilisateurs - Récupération de tous les utilisateurs");
         
         try {
-            List<Utilisateur> utilisateurs = utilisateurService.obtenirTousLesUtilisateurs();
+            List<Utilisateur> utilisateurs = utilisateurService.obtenirTousLesUtilisateursActifs();
             return ResponseEntity.ok(utilisateurs);
         } catch (Exception e) {
             log.error("Erreur lors de la récupération des utilisateurs", e);
@@ -135,7 +141,7 @@ public class UtilisateurController {
         log.info("GET /api/utilisateurs/recherche?email={} - Recherche par email", email);
         
         try {
-            Optional<Utilisateur> utilisateur = utilisateurService.trouverParEmail(email);
+            Optional<Utilisateur> utilisateur = utilisateurService.obtenirUtilisateurParEmail(email);
             return utilisateur
                 .map(u -> ResponseEntity.ok().body(u))
                 .orElse(ResponseEntity.notFound().build());
@@ -154,7 +160,7 @@ public class UtilisateurController {
         log.info("GET /api/utilisateurs/count - Comptage des utilisateurs");
         
         try {
-            long nombreUtilisateurs = utilisateurService.compterUtilisateurs();
+            long nombreUtilisateurs = utilisateurService.compterUtilisateursActifs();
             return ResponseEntity.ok(nombreUtilisateurs);
         } catch (Exception e) {
             log.error("Erreur lors du comptage des utilisateurs", e);
@@ -172,7 +178,7 @@ public class UtilisateurController {
         log.info("GET /api/utilisateurs/exists?email={} - Vérification d'existence", email);
         
         try {
-            boolean existe = utilisateurService.existeParEmail(email);
+            boolean existe = utilisateurService.existsByEmail(email);
             return ResponseEntity.ok(existe);
         } catch (Exception e) {
             log.error("Erreur lors de la vérification d'existence", e);

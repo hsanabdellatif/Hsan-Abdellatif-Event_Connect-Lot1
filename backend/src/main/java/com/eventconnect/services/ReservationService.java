@@ -2,13 +2,12 @@ package com.eventconnect.services;
 
 import com.eventconnect.entities.Evenement;
 import com.eventconnect.entities.Reservation;
-import com.eventconnect.entities.StatutReservation;
 import com.eventconnect.entities.Utilisateur;
 import com.eventconnect.repositories.EvenementRepository;
 import com.eventconnect.repositories.ReservationRepository;
 import com.eventconnect.repositories.UtilisateurRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +24,24 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor
-@Slf4j
 public class ReservationService {
+
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
 
     private final ReservationRepository reservationRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final EvenementRepository evenementRepository;
     private final EvenementService evenementService;
+
+    public ReservationService(ReservationRepository reservationRepository,
+                             UtilisateurRepository utilisateurRepository,
+                             EvenementRepository evenementRepository,
+                             EvenementService evenementService) {
+        this.reservationRepository = reservationRepository;
+        this.utilisateurRepository = utilisateurRepository;
+        this.evenementRepository = evenementRepository;
+        this.evenementService = evenementService;
+    }
 
     /**
      * Crée une nouvelle réservation
@@ -72,7 +81,7 @@ public class ReservationService {
         }
         
         // Calcul du montant total
-        BigDecimal montantTotal = evenement.getPrixPlace().multiply(new BigDecimal(nombrePlaces));
+        BigDecimal montantTotal = evenement.getPrix().multiply(new BigDecimal(nombrePlaces));
         
         // Création de la réservation
         Reservation reservation = new Reservation();
@@ -80,7 +89,7 @@ public class ReservationService {
         reservation.setEvenement(evenement);
         reservation.setNombrePlaces(nombrePlaces);
         reservation.setMontantTotal(montantTotal);
-        reservation.setStatut(StatutReservation.EN_ATTENTE);
+        reservation.setStatut(Reservation.StatutReservation.EN_ATTENTE);
         reservation.setDateReservation(LocalDateTime.now());
         
         Reservation nouvelleReservation = reservationRepository.save(reservation);
@@ -101,7 +110,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'ID: " + reservationId));
         
-        if (reservation.getStatut() != StatutReservation.EN_ATTENTE) {
+        if (reservation.getStatut() != Reservation.StatutReservation.EN_ATTENTE) {
             throw new RuntimeException("Seules les réservations en attente peuvent être confirmées");
         }
         
@@ -110,7 +119,7 @@ public class ReservationService {
             throw new RuntimeException("Impossible de confirmer une réservation pour un événement passé");
         }
         
-        reservation.setStatut(StatutReservation.CONFIRMEE);
+        reservation.setStatut(Reservation.StatutReservation.CONFIRMEE);
         reservation.setDateConfirmation(LocalDateTime.now());
         
         Reservation reservationConfirmee = reservationRepository.save(reservation);
@@ -131,11 +140,11 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'ID: " + reservationId));
         
-        if (reservation.getStatut() == StatutReservation.ANNULEE) {
+        if (reservation.getStatut() == Reservation.StatutReservation.ANNULEE) {
             throw new RuntimeException("Cette réservation est déjà annulée");
         }
         
-        reservation.setStatut(StatutReservation.ANNULEE);
+        reservation.setStatut(Reservation.StatutReservation.ANNULEE);
         reservation.setDateAnnulation(LocalDateTime.now());
         
         Reservation reservationAnnulee = reservationRepository.save(reservation);
@@ -191,7 +200,7 @@ public class ReservationService {
      * @return liste des réservations avec ce statut
      */
     @Transactional(readOnly = true)
-    public List<Reservation> obtenirReservationsParStatut(StatutReservation statut) {
+    public List<Reservation> obtenirReservationsParStatut(Reservation.StatutReservation statut) {
         log.info("Récupération des réservations avec le statut: {}", statut);
         return reservationRepository.findByStatut(statut);
     }

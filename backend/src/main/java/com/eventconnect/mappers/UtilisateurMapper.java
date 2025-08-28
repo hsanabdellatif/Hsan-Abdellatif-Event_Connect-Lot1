@@ -32,7 +32,7 @@ public class UtilisateurMapper {
             utilisateur.getPrenom(),
             utilisateur.getEmail(),
             utilisateur.getTelephone(),
-            utilisateur.getDateInscription(),
+            utilisateur.getDateCreation(),
             utilisateur.getDateModification(),
             utilisateur.getActif()
         );
@@ -55,7 +55,7 @@ public class UtilisateurMapper {
         utilisateur.setEmail(dto.getEmail());
         utilisateur.setMotDePasse(dto.getMotDePasse());
         utilisateur.setTelephone(dto.getTelephone());
-        utilisateur.setDateInscription(dto.getDateInscription());
+        utilisateur.setDateCreation(dto.getDateInscription());
         utilisateur.setDateModification(dto.getDateModification());
         utilisateur.setActif(dto.getActif());
 

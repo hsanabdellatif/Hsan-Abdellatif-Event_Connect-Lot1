@@ -184,4 +184,27 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
                    "ORDER BY COUNT(r.id) DESC " +
                    "LIMIT :limit", nativeQuery = true)
     List<Evenement> findEvenementsLesplusPopulaires(@Param("limit") int limit);
+
+    /**
+     * Trouve les événements par titre (recherche partielle)
+     * @param titre le titre à rechercher
+     * @return Liste des événements correspondants
+     */
+    List<Evenement> findByTitreContaining(String titre);
+
+    /**
+     * Trouve les événements futurs (après une date donnée)
+     * @param date la date de référence
+     * @return Liste des événements futurs
+     */
+    List<Evenement> findByDateDebutGreaterThan(LocalDateTime date);
+
+    /**
+     * Compte les places réservées pour un événement
+     * @param evenementId l'ID de l'événement
+     * @return le nombre de places réservées
+     */
+    @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
+           "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
+    Integer countPlacesReserveesParEvenement(@Param("evenementId") Long evenementId);
 }

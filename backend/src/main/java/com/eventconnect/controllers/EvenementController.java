@@ -34,8 +34,6 @@ public class EvenementController {
         this.evenementService = evenementService;
     }
 
-    private final EvenementService evenementService;
-
     /**
      * Crée un nouvel événement
      * @param evenement les données de l'événement à créer

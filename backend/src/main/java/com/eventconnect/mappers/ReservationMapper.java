@@ -41,7 +41,7 @@ public class ReservationMapper {
             reservation.getDateReservation(),
             reservation.getDateConfirmation(),
             reservation.getDateAnnulation(),
-            reservation.getCommentaires(),
+            reservation.getCommentaire(),
             reservation.getUtilisateur() != null ? reservation.getUtilisateur().getId() : null,
             reservation.getUtilisateur() != null ? reservation.getUtilisateur().getNomComplet() : null,
             reservation.getUtilisateur() != null ? reservation.getUtilisateur().getEmail() : null,
@@ -69,7 +69,7 @@ public class ReservationMapper {
             reservation.getDateReservation(),
             reservation.getDateConfirmation(),
             reservation.getDateAnnulation(),
-            reservation.getCommentaires(),
+            reservation.getCommentaire(),
             reservation.getUtilisateur() != null ? utilisateurMapper.toSimpleDTO(reservation.getUtilisateur()) : null,
             reservation.getEvenement() != null ? evenementMapper.toSimpleDTO(reservation.getEvenement()) : null
         );
@@ -93,7 +93,7 @@ public class ReservationMapper {
         reservation.setDateReservation(dto.getDateReservation());
         reservation.setDateConfirmation(dto.getDateConfirmation());
         reservation.setDateAnnulation(dto.getDateAnnulation());
-        reservation.setCommentaires(dto.getCommentaires());
+        reservation.setCommentaire(dto.getCommentaires());
 
         // Note: Les entités utilisateur et événement doivent être définies séparément
         // car elles nécessitent un accès aux repositories
@@ -118,7 +118,7 @@ public class ReservationMapper {
         reservation.setDateAnnulation(dto.getDateAnnulation());
         
         if (dto.getCommentaires() != null) {
-            reservation.setCommentaires(dto.getCommentaires());
+            reservation.setCommentaire(dto.getCommentaires());
         }
     }
 

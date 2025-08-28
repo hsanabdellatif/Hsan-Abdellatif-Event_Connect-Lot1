@@ -5,9 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,9 +16,6 @@ import java.time.LocalDateTime;
  * @author EventConnect Team
  * @version 2.0.0
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReservationDTO {
 
@@ -60,6 +54,81 @@ public class ReservationDTO {
     private Long evenementId;
     private String evenementTitre;
     private LocalDateTime evenementDate;
+
+    // Constructeurs
+    public ReservationDTO() {}
+
+    public ReservationDTO(Long id, Integer nombrePlaces, BigDecimal montantTotal, StatutReservation statut,
+                         LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
+                         String commentaires, UtilisateurDTO utilisateur, EvenementDTO evenement,
+                         Long utilisateurId, String utilisateurNom, String utilisateurEmail,
+                         Long evenementId, String evenementTitre, LocalDateTime evenementDate) {
+        this.id = id;
+        this.nombrePlaces = nombrePlaces;
+        this.montantTotal = montantTotal;
+        this.statut = statut;
+        this.dateReservation = dateReservation;
+        this.dateConfirmation = dateConfirmation;
+        this.dateAnnulation = dateAnnulation;
+        this.commentaires = commentaires;
+        this.utilisateur = utilisateur;
+        this.evenement = evenement;
+        this.utilisateurId = utilisateurId;
+        this.utilisateurNom = utilisateurNom;
+        this.utilisateurEmail = utilisateurEmail;
+        this.evenementId = evenementId;
+        this.evenementTitre = evenementTitre;
+        this.evenementDate = evenementDate;
+    }
+
+    // Getters et Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Integer getNombrePlaces() { return nombrePlaces; }
+    public void setNombrePlaces(Integer nombrePlaces) { this.nombrePlaces = nombrePlaces; }
+
+    public BigDecimal getMontantTotal() { return montantTotal; }
+    public void setMontantTotal(BigDecimal montantTotal) { this.montantTotal = montantTotal; }
+
+    public StatutReservation getStatut() { return statut; }
+    public void setStatut(StatutReservation statut) { this.statut = statut; }
+
+    public LocalDateTime getDateReservation() { return dateReservation; }
+    public void setDateReservation(LocalDateTime dateReservation) { this.dateReservation = dateReservation; }
+
+    public LocalDateTime getDateConfirmation() { return dateConfirmation; }
+    public void setDateConfirmation(LocalDateTime dateConfirmation) { this.dateConfirmation = dateConfirmation; }
+
+    public LocalDateTime getDateAnnulation() { return dateAnnulation; }
+    public void setDateAnnulation(LocalDateTime dateAnnulation) { this.dateAnnulation = dateAnnulation; }
+
+    public String getCommentaires() { return commentaires; }
+    public void setCommentaires(String commentaires) { this.commentaires = commentaires; }
+
+    public UtilisateurDTO getUtilisateur() { return utilisateur; }
+    public void setUtilisateur(UtilisateurDTO utilisateur) { this.utilisateur = utilisateur; }
+
+    public EvenementDTO getEvenement() { return evenement; }
+    public void setEvenement(EvenementDTO evenement) { this.evenement = evenement; }
+
+    public Long getUtilisateurId() { return utilisateurId; }
+    public void setUtilisateurId(Long utilisateurId) { this.utilisateurId = utilisateurId; }
+
+    public String getUtilisateurNom() { return utilisateurNom; }
+    public void setUtilisateurNom(String utilisateurNom) { this.utilisateurNom = utilisateurNom; }
+
+    public String getUtilisateurEmail() { return utilisateurEmail; }
+    public void setUtilisateurEmail(String utilisateurEmail) { this.utilisateurEmail = utilisateurEmail; }
+
+    public Long getEvenementId() { return evenementId; }
+    public void setEvenementId(Long evenementId) { this.evenementId = evenementId; }
+
+    public String getEvenementTitre() { return evenementTitre; }
+    public void setEvenementTitre(String evenementTitre) { this.evenementTitre = evenementTitre; }
+
+    public LocalDateTime getEvenementDate() { return evenementDate; }
+    public void setEvenementDate(LocalDateTime evenementDate) { this.evenementDate = evenementDate; }
 
     /**
      * Constructeur pour la création de réservation

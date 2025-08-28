@@ -73,8 +73,8 @@ public class EvenementService {
         evenementExistant.setDateDebut(evenementMiseAJour.getDateDebut());
         evenementExistant.setDateFin(evenementMiseAJour.getDateFin());
         evenementExistant.setLieu(evenementMiseAJour.getLieu());
-        evenementExistant.setCapaciteMax(evenementMiseAJour.getCapaciteMax());
-        evenementExistant.setPrixPlace(evenementMiseAJour.getPrixPlace());
+        evenementExistant.setPlacesMax(evenementMiseAJour.getPlacesMax());
+        evenementExistant.setPrix(evenementMiseAJour.getPrix());
         evenementExistant.setCategorie(evenementMiseAJour.getCategorie());
         
         // Validation des dates
@@ -118,7 +118,7 @@ public class EvenementService {
     @Transactional(readOnly = true)
     public List<Evenement> rechercherParTitre(String titre) {
         log.info("Recherche d'événements par titre: {}", titre);
-        return evenementRepository.findByTitreContainingIgnoreCase(titre);
+        return evenementRepository.findByTitreContaining(titre);
     }
 
     /**
@@ -128,7 +128,7 @@ public class EvenementService {
     @Transactional(readOnly = true)
     public List<Evenement> obtenirEvenementsFuturs() {
         log.info("Récupération des événements futurs");
-        return evenementRepository.findByDateDebutAfter(LocalDateTime.now());
+        return evenementRepository.findByDateDebutGreaterThan(LocalDateTime.now());
     }
 
     /**
@@ -139,7 +139,13 @@ public class EvenementService {
     @Transactional(readOnly = true)
     public List<Evenement> obtenirEvenementsParCategorie(String categorie) {
         log.info("Récupération des événements de la catégorie: {}", categorie);
-        return evenementRepository.findByCategorie(categorie);
+        try {
+            Evenement.CategorieEvenement cat = Evenement.CategorieEvenement.valueOf(categorie);
+            return evenementRepository.findByCategorie(cat);
+        } catch (IllegalArgumentException e) {
+            log.warn("Catégorie invalide: {}", categorie);
+            return List.of();
+        }
     }
 
     /**
@@ -149,7 +155,7 @@ public class EvenementService {
     @Transactional(readOnly = true)
     public List<Evenement> obtenirEvenementsDisponibles() {
         log.info("Récupération des événements disponibles");
-        return evenementRepository.findEvenementsDisponibles();
+        return evenementRepository.findEvenementsAvecPlacesDisponibles();
     }
 
     /**
@@ -181,9 +187,9 @@ public class EvenementService {
         Evenement evenement = evenementRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + id));
         
-        Integer placesReservees = evenementRepository.countReservationsForEvenement(id);
-        Integer placesDisponibles = evenement.getCapaciteMax() - placesReservees;
-        
+        Integer placesReservees = evenementRepository.countPlacesReserveesParEvenement(id);
+        Integer placesDisponibles = evenement.getPlacesMax() - placesReservees;
+
         return placesDisponibles >= nombrePlaces;
     }
 

@@ -33,9 +33,9 @@ public class EvenementMapper {
             evenement.getDateDebut(),
             evenement.getDateFin(),
             evenement.getLieu(),
-            evenement.getCapaciteMax(),
-            evenement.getPrixPlace(),
-            evenement.getCategorie(),
+            evenement.getPlacesMax(),
+            evenement.getPrix(),
+            evenement.getCategorie() != null ? evenement.getCategorie().name() : null,
             evenement.getImageUrl(),
             evenement.getDateCreation(),
             evenement.getDateModification(),
@@ -58,7 +58,7 @@ public class EvenementMapper {
             return null;
         }
 
-        Integer placesDisponibles = evenement.getCapaciteMax() - (placesReservees != null ? placesReservees : 0);
+        Integer placesDisponibles = evenement.getPlacesMax() - (placesReservees != null ? placesReservees : 0);
 
         return new EvenementDTO(
             evenement.getId(),
@@ -67,9 +67,9 @@ public class EvenementMapper {
             evenement.getDateDebut(),
             evenement.getDateFin(),
             evenement.getLieu(),
-            evenement.getCapaciteMax(),
-            evenement.getPrixPlace(),
-            evenement.getCategorie(),
+            evenement.getPlacesMax(),
+            evenement.getPrix(),
+            evenement.getCategorie() != null ? evenement.getCategorie().name() : null,
             evenement.getImageUrl(),
             evenement.getDateCreation(),
             evenement.getDateModification(),
@@ -97,9 +97,11 @@ public class EvenementMapper {
         evenement.setDateDebut(dto.getDateDebut());
         evenement.setDateFin(dto.getDateFin());
         evenement.setLieu(dto.getLieu());
-        evenement.setCapaciteMax(dto.getCapaciteMax());
-        evenement.setPrixPlace(dto.getPrixPlace());
-        evenement.setCategorie(dto.getCategorie());
+        evenement.setPlacesMax(dto.getCapaciteMax());
+        evenement.setPrix(dto.getPrixPlace());
+        if (dto.getCategorie() != null) {
+            evenement.setCategorie(Evenement.CategorieEvenement.valueOf(dto.getCategorie()));
+        }
         evenement.setImageUrl(dto.getImageUrl());
         evenement.setDateCreation(dto.getDateCreation());
         evenement.setDateModification(dto.getDateModification());
@@ -123,9 +125,11 @@ public class EvenementMapper {
         evenement.setDateDebut(dto.getDateDebut());
         evenement.setDateFin(dto.getDateFin());
         evenement.setLieu(dto.getLieu());
-        evenement.setCapaciteMax(dto.getCapaciteMax());
-        evenement.setPrixPlace(dto.getPrixPlace());
-        evenement.setCategorie(dto.getCategorie());
+        evenement.setPlacesMax(dto.getCapaciteMax());
+        evenement.setPrix(dto.getPrixPlace());
+        if (dto.getCategorie() != null) {
+            evenement.setCategorie(Evenement.CategorieEvenement.valueOf(dto.getCategorie()));
+        }
         
         if (dto.getImageUrl() != null) {
             evenement.setImageUrl(dto.getImageUrl());
@@ -182,8 +186,8 @@ public class EvenementMapper {
         dto.setDateDebut(evenement.getDateDebut());
         dto.setDateFin(evenement.getDateFin());
         dto.setLieu(evenement.getLieu());
-        dto.setPrixPlace(evenement.getPrixPlace());
-        dto.setCategorie(evenement.getCategorie());
+        dto.setPrixPlace(evenement.getPrix());
+        dto.setCategorie(evenement.getCategorie() != null ? evenement.getCategorie().name() : null);
 
         return dto;
     }

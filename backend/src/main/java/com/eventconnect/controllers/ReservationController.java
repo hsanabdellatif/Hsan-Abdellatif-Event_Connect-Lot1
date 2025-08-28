@@ -1,7 +1,6 @@
 package com.eventconnect.controllers;
 
 import com.eventconnect.entities.Reservation;
-import com.eventconnect.entities.StatutReservation;
 import com.eventconnect.services.ReservationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,7 +163,7 @@ public class ReservationController {
      * @return liste des réservations avec ce statut
      */
     @GetMapping("/statut/{statut}")
-    public ResponseEntity<List<Reservation>> obtenirReservationsParStatut(@PathVariable StatutReservation statut) {
+    public ResponseEntity<List<Reservation>> obtenirReservationsParStatut(@PathVariable Reservation.StatutReservation statut) {
         log.info("GET /api/reservations/statut/{} - Récupération des réservations par statut", statut);
         
         try {

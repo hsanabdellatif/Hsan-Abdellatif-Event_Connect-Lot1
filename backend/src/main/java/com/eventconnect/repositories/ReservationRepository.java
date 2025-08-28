@@ -71,6 +71,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByEvenementAndActifTrue(Evenement evenement);
 
     /**
+     * Trouve une réservation par utilisateur et événement
+     * @param utilisateur l'utilisateur
+     * @param evenement l'événement
+     * @return Optional contenant la réservation si elle existe
+     */
+    Optional<Reservation> findByUtilisateurAndEvenement(Utilisateur utilisateur, Evenement evenement);
+
+    /**
      * Trouve une réservation par son code
      * @param codeReservation le code de la réservation
      * @return Optional contenant la réservation si elle existe
@@ -208,4 +216,22 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE r.statut = 'CONFIRMEE' " +
            "AND r.evenement.dateDebut > :dateMinimum AND r.actif = true")
     List<Reservation> findReservationsRemboursables(@Param("dateMinimum") LocalDateTime dateMinimum);
+
+    /**
+     * Calcule le chiffre d'affaires total pour un événement
+     * @param evenementId l'ID de l'événement
+     * @return le chiffre d'affaires total
+     */
+    @Query("SELECT COALESCE(SUM(r.montantTotal), 0) FROM Reservation r " +
+           "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
+    BigDecimal calculateTotalRevenueForEvenement(@Param("evenementId") Long evenementId);
+
+    /**
+     * Compte le nombre de places réservées pour un événement
+     * @param evenementId l'ID de l'événement
+     * @return le nombre de places réservées
+     */
+    @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
+           "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
+    Integer countPlacesReserveesForEvenement(@Param("evenementId") Long evenementId);
 }
