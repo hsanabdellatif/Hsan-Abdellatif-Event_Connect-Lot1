@@ -75,4 +75,17 @@ export class EventsComponent implements OnInit {
   viewReservations(id: number): void {
     console.log('Voir réservations pour événement:', id);
   }
+
+  // Méthodes pour les statistiques
+  getTotalReservations(): number {
+    return this.events.reduce((sum, e) => sum + e.placesReservees, 0);
+  }
+
+  getTotalPlacesDisponibles(): number {
+    return this.events.reduce((sum, e) => sum + (e.nombrePlaces - e.placesReservees), 0);
+  }
+
+  getTotalRevenues(): number {
+    return this.events.reduce((sum, e) => sum + (e.prix * e.placesReservees), 0);
+  }
 }
