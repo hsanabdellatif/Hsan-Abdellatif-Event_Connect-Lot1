@@ -2,27 +2,76 @@ package com.eventconnect.services;
 
 import com.eventconnect.entities.Utilisateur;
 import com.eventconnect.repositories.UtilisateurRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Service pour la gestion des utilisateurs
+ * Implémente UserDetailsService pour l'authentification Spring Security
  * 
  * @author EventConnect Team
  * @version 2.0.0
  */
 @Service
 @Transactional
-@RequiredArgsConstructor
-@Slf4j
-public class UtilisateurService {
+public class UtilisateurService implements UserDetailsService {
+
+    private static final Logger log = LoggerFactory.getLogger(UtilisateurService.class);
 
     private final UtilisateurRepository utilisateurRepository;
+
+    public UtilisateurService(UtilisateurRepository utilisateurRepository) {
+        this.utilisateurRepository = utilisateurRepository;
+    }
+
+    /**
+     * Charge un utilisateur par son email pour Spring Security
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("Utilisateur introuvable avec l'email: " + email));
+
+        return org.springframework.security.core.userdetails.User.builder()
+            .username(utilisateur.getEmail())
+            .password(utilisateur.getMotDePasse())
+            .authorities(new ArrayList<>()) // Pour l'instant, pas de rôles spécifiques
+            .build();
+    }
+
+    /**
+     * Trouve un utilisateur par email
+     */
+    @Transactional(readOnly = true)
+    public Utilisateur findByEmail(String email) {
+        return utilisateurRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable avec l'email: " + email));
+    }
+
+    /**
+     * Vérifie si un email existe déjà
+     */
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return utilisateurRepository.existsByEmail(email);
+    }
+
+    /**
+     * Crée un nouvel utilisateur (méthode publique pour AuthController)
+     */
+    public Utilisateur creer(Utilisateur utilisateur) {
+        return creerUtilisateur(utilisateur);
+    }
 
     /**
      * Crée un nouvel utilisateur
