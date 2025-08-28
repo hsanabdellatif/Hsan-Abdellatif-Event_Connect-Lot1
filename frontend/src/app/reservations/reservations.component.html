@@ -1,0 +1,146 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <!-- Statistiques en haut -->
+    <div class="row">
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-info card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">book_online</i>
+            </div>
+            <p class="card-category">Total Réservations</p>
+            <h3 class="card-title">{{ getReservationsStats().total }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-success card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">check_circle</i>
+            </div>
+            <p class="card-category">Confirmées</p>
+            <h3 class="card-title">{{ getReservationsStats().confirmees }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-warning card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">schedule</i>
+            </div>
+            <p class="card-category">En Attente</p>
+            <h3 class="card-title">{{ getReservationsStats().enAttente }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-primary card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">euro_symbol</i>
+            </div>
+            <p class="card-category">Revenus Confirmés</p>
+            <h3 class="card-title">{{ getReservationsStats().revenuTotal | currency:'EUR' }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table des réservations -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">Gestion des Réservations</h4>
+            <p class="card-category">Liste de toutes les réservations</p>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <select class="form-control">
+                    <option value="">Tous les statuts</option>
+                    <option value="CONFIRMEE">Confirmées</option>
+                    <option value="EN_ATTENTE">En attente</option>
+                    <option value="ANNULEE">Annulées</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="text" class="form-control" placeholder="Rechercher par nom ou email...">
+                </div>
+              </div>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table">
+                <thead class="text-primary">
+                  <tr>
+                    <th>ID</th>
+                    <th>Utilisateur</th>
+                    <th>Événement</th>
+                    <th>Date Réservation</th>
+                    <th>Places</th>
+                    <th>Prix Total</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let reservation of reservations">
+                    <td>{{ reservation.id }}</td>
+                    <td>
+                      <strong>{{ reservation.utilisateurNom }}</strong>
+                      <br>
+                      <small class="text-muted">{{ reservation.utilisateurEmail }}</small>
+                    </td>
+                    <td>{{ reservation.evenementNom }}</td>
+                    <td>{{ reservation.dateReservation | date:'short' }}</td>
+                    <td>
+                      <span class="badge badge-info">{{ reservation.nombrePlaces }}</span>
+                    </td>
+                    <td>
+                      <span *ngIf="reservation.prixTotal > 0">{{ reservation.prixTotal | currency:'EUR' }}</span>
+                      <span *ngIf="reservation.prixTotal === 0" class="badge badge-success">Gratuit</span>
+                    </td>
+                    <td>
+                      <span class="badge" 
+                            [ngClass]="'badge-' + getStatusColor(reservation.statut)">
+                        {{ getStatusLabel(reservation.statut) }}
+                      </span>
+                    </td>
+                    <td class="td-actions text-right">
+                      <button type="button" 
+                              class="btn btn-info btn-sm" 
+                              matTooltip="Voir détails"
+                              (click)="viewReservation(reservation.id)">
+                        <i class="material-icons">visibility</i>
+                      </button>
+                      <button type="button" 
+                              *ngIf="reservation.statut === 'EN_ATTENTE'"
+                              class="btn btn-success btn-sm" 
+                              matTooltip="Confirmer"
+                              (click)="confirmReservation(reservation.id)">
+                        <i class="material-icons">check</i>
+                      </button>
+                      <button type="button" 
+                              *ngIf="reservation.statut !== 'ANNULEE'"
+                              class="btn btn-danger btn-sm" 
+                              matTooltip="Annuler"
+                              (click)="cancelReservation(reservation.id)">
+                        <i class="material-icons">cancel</i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

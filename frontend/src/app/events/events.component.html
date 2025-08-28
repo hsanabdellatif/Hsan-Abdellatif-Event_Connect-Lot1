@@ -1,0 +1,145 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">Gestion des Événements</h4>
+            <p class="card-category">Liste de tous les événements</p>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <button type="button" class="btn btn-primary">
+                  <i class="material-icons">add</i>
+                  Nouvel Événement
+                </button>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="text" class="form-control" placeholder="Rechercher un événement...">
+                </div>
+              </div>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table">
+                <thead class="text-primary">
+                  <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Date Début</th>
+                    <th>Date Fin</th>
+                    <th>Lieu</th>
+                    <th>Places</th>
+                    <th>Prix</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let event of events">
+                    <td>{{ event.id }}</td>
+                    <td>
+                      <strong>{{ event.nom }}</strong>
+                      <br>
+                      <small class="text-muted">{{ event.description }}</small>
+                    </td>
+                    <td>{{ event.dateDebut | date:'short' }}</td>
+                    <td>{{ event.dateFin | date:'short' }}</td>
+                    <td>{{ event.lieu }}</td>
+                    <td>
+                      <span class="badge badge-info">{{ event.placesReservees }}</span>
+                      /
+                      <span class="badge badge-secondary">{{ event.nombrePlaces }}</span>
+                      <br>
+                      <small class="text-success">{{ getPlacesDisponibles(event) }} disponibles</small>
+                    </td>
+                    <td>
+                      <span *ngIf="event.prix > 0">{{ event.prix | currency:'EUR' }}</span>
+                      <span *ngIf="event.prix === 0" class="badge badge-success">Gratuit</span>
+                    </td>
+                    <td>
+                      <span class="badge" 
+                            [ngClass]="'badge-' + getStatusColor(event.statut)">
+                        {{ event.statut }}
+                      </span>
+                    </td>
+                    <td class="td-actions text-right">
+                      <button type="button" 
+                              class="btn btn-info btn-sm" 
+                              matTooltip="Voir réservations"
+                              (click)="viewReservations(event.id)">
+                        <i class="material-icons">visibility</i>
+                      </button>
+                      <button type="button" 
+                              class="btn btn-success btn-sm" 
+                              matTooltip="Éditer"
+                              (click)="editEvent(event.id)">
+                        <i class="material-icons">edit</i>
+                      </button>
+                      <button type="button" 
+                              class="btn btn-danger btn-sm" 
+                              matTooltip="Supprimer"
+                              (click)="deleteEvent(event.id)">
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Statistiques rapides -->
+    <div class="row">
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-success card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">event</i>
+            </div>
+            <p class="card-category">Total Événements</p>
+            <h3 class="card-title">{{ events.length }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-warning card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">book_online</i>
+            </div>
+            <p class="card-category">Réservations Totales</p>
+            <h3 class="card-title">{{ events.reduce((sum, e) => sum + e.placesReservees, 0) }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-danger card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">event_seat</i>
+            </div>
+            <p class="card-category">Places Disponibles</p>
+            <h3 class="card-title">{{ events.reduce((sum, e) => sum + (e.nombrePlaces - e.placesReservees), 0) }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-info card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">euro_symbol</i>
+            </div>
+            <p class="card-category">Revenus Prévus</p>
+            <h3 class="card-title">{{ events.reduce((sum, e) => sum + (e.prix * e.placesReservees), 0) | currency:'EUR' }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

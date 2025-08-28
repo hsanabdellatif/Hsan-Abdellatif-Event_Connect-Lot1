@@ -8,6 +8,28 @@ import * as Chartist from 'chartist';
 })
 export class DashboardComponent implements OnInit {
 
+  // Données de démonstration EventConnect
+  dashboardStats = {
+    totalEvents: 12,
+    totalReservations: 234,
+    totalUsers: 89,
+    revenue: 15750.00,
+    activeEvents: 8,
+    pendingReservations: 15
+  };
+
+  recentEvents = [
+    { nom: 'Conférence Tech 2025', date: '2025-09-15', reservations: 45 },
+    { nom: 'Workshop Angular', date: '2025-09-20', reservations: 28 },
+    { nom: 'Meetup DevOps', date: '2025-10-05', reservations: 34 }
+  ];
+
+  recentReservations = [
+    { utilisateur: 'Jean Dupont', evenement: 'Conférence Tech 2025', statut: 'CONFIRMEE' },
+    { utilisateur: 'Marie Martin', evenement: 'Workshop Angular', statut: 'EN_ATTENTE' },
+    { utilisateur: 'Pierre Durand', evenement: 'Meetup DevOps', statut: 'CONFIRMEE' }
+  ];
+
   constructor() { }
   startAnimationForLineChart(chart){
       let seq: any, delays: any, durations: any;

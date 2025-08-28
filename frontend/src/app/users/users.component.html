@@ -1,0 +1,167 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <!-- Statistiques en haut -->
+    <div class="row">
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-info card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">people</i>
+            </div>
+            <p class="card-category">Total Utilisateurs</p>
+            <h3 class="card-title">{{ getUsersStats().total }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-success card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">check_circle</i>
+            </div>
+            <p class="card-category">Utilisateurs Actifs</p>
+            <h3 class="card-title">{{ getUsersStats().actifs }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-danger card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">admin_panel_settings</i>
+            </div>
+            <p class="card-category">Administrateurs</p>
+            <h3 class="card-title">{{ getUsersStats().admins }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+          <div class="card-header card-header-primary card-header-icon">
+            <div class="card-icon">
+              <i class="material-icons">euro_symbol</i>
+            </div>
+            <p class="card-category">Revenus Générés</p>
+            <h3 class="card-title">{{ getUsersStats().revenuTotal | currency:'EUR' }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table des utilisateurs -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">Gestion des Utilisateurs</h4>
+            <p class="card-category">Liste de tous les utilisateurs</p>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <select class="form-control">
+                    <option value="">Tous les rôles</option>
+                    <option value="ADMIN">Administrateurs</option>
+                    <option value="MODERATOR">Modérateurs</option>
+                    <option value="USER">Utilisateurs</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <select class="form-control">
+                    <option value="">Tous les statuts</option>
+                    <option value="true">Actifs</option>
+                    <option value="false">Inactifs</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" placeholder="Rechercher par nom ou email...">
+                </div>
+              </div>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table">
+                <thead class="text-primary">
+                  <tr>
+                    <th>ID</th>
+                    <th>Nom Complet</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Date Inscription</th>
+                    <th>Réservations</th>
+                    <th>Total Dépensé</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of users">
+                    <td>{{ user.id }}</td>
+                    <td>
+                      <strong>{{ user.prenom }} {{ user.nom }}</strong>
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.telephone }}</td>
+                    <td>{{ user.dateInscription | date:'short' }}</td>
+                    <td>
+                      <span class="badge badge-info">{{ user.nombreReservations }}</span>
+                    </td>
+                    <td>
+                      <span *ngIf="user.totalDepense > 0">{{ user.totalDepense | currency:'EUR' }}</span>
+                      <span *ngIf="user.totalDepense === 0" class="text-muted">Aucune</span>
+                    </td>
+                    <td>
+                      <span class="badge" 
+                            [ngClass]="'badge-' + getRoleColor(user.role)">
+                        {{ getRoleLabel(user.role) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge" 
+                            [ngClass]="user.actif ? 'badge-success' : 'badge-secondary'">
+                        {{ user.actif ? 'Actif' : 'Inactif' }}
+                      </span>
+                    </td>
+                    <td class="td-actions text-right">
+                      <button type="button" 
+                              class="btn btn-info btn-sm" 
+                              matTooltip="Voir réservations"
+                              (click)="viewUserReservations(user.id)">
+                        <i class="material-icons">visibility</i>
+                      </button>
+                      <button type="button" 
+                              class="btn btn-success btn-sm" 
+                              matTooltip="Éditer"
+                              (click)="editUser(user.id)">
+                        <i class="material-icons">edit</i>
+                      </button>
+                      <button type="button" 
+                              [class]="user.actif ? 'btn btn-warning btn-sm' : 'btn btn-success btn-sm'" 
+                              [matTooltip]="user.actif ? 'Désactiver' : 'Activer'"
+                              (click)="toggleUserStatus(user.id)">
+                        <i class="material-icons">{{ user.actif ? 'block' : 'check_circle' }}</i>
+                      </button>
+                      <button type="button" 
+                              *ngIf="user.role !== 'ADMIN'"
+                              class="btn btn-danger btn-sm" 
+                              matTooltip="Supprimer"
+                              (click)="deleteUser(user.id)">
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

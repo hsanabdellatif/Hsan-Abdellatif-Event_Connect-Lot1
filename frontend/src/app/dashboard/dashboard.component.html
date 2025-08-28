@@ -1,21 +1,20 @@
 <div class="main-content">
   <div class="container-fluid">
+      <!-- Statistiques principales EventConnect -->
       <div class="row">
           <div class="col-lg-3 col-md-6 col-sm-6">
               <div class="card card-stats">
-                  <div class="card-header card-header-warning card-header-icon">
+                  <div class="card-header card-header-primary card-header-icon">
                       <div class="card-icon">
-                          <i class="material-icons">content_copy</i>
+                          <i class="material-icons">event</i>
                       </div>
-                      <p class="card-category">Used Space</p>
-                      <h3 class="card-title">49/50
-                          <small>GB</small>
-                      </h3>
+                      <p class="card-category">Total Événements</p>
+                      <h3 class="card-title">{{ dashboardStats.totalEvents }}</h3>
                   </div>
                   <div class="card-footer">
                       <div class="stats">
-                          <i class="material-icons text-danger">warning</i>
-                          <a href="javascript:void(0)">Get More Space...</a>
+                          <i class="material-icons text-success">trending_up</i>
+                          <span class="text-success">{{ dashboardStats.activeEvents }} actifs</span>
                       </div>
                   </div>
               </div>
@@ -24,30 +23,32 @@
               <div class="card card-stats">
                   <div class="card-header card-header-success card-header-icon">
                       <div class="card-icon">
-                          <i class="material-icons">store</i>
+                          <i class="material-icons">book_online</i>
                       </div>
-                      <p class="card-category">Revenue</p>
-                      <h3 class="card-title">$34,245</h3>
+                      <p class="card-category">Total Réservations</p>
+                      <h3 class="card-title">{{ dashboardStats.totalReservations }}</h3>
                   </div>
                   <div class="card-footer">
                       <div class="stats">
-                          <i class="material-icons">date_range</i> Last 24 Hours
+                          <i class="material-icons text-warning">schedule</i>
+                          <span class="text-warning">{{ dashboardStats.pendingReservations }} en attente</span>
                       </div>
                   </div>
               </div>
           </div>
           <div class="col-lg-3 col-md-6 col-sm-6">
               <div class="card card-stats">
-                  <div class="card-header card-header-danger card-header-icon">
+                  <div class="card-header card-header-warning card-header-icon">
                       <div class="card-icon">
-                          <i class="material-icons">info_outline</i>
+                          <i class="material-icons">people</i>
                       </div>
-                      <p class="card-category">Fixed Issues</p>
-                      <h3 class="card-title">75</h3>
+                      <p class="card-category">Utilisateurs Inscrits</p>
+                      <h3 class="card-title">{{ dashboardStats.totalUsers }}</h3>
                   </div>
                   <div class="card-footer">
                       <div class="stats">
-                          <i class="material-icons">local_offer</i> Tracked from Github
+                          <i class="material-icons text-info">person_add</i>
+                          <span class="text-info">+12 ce mois</span>
                       </div>
                   </div>
               </div>
@@ -56,48 +57,87 @@
               <div class="card card-stats">
                   <div class="card-header card-header-info card-header-icon">
                       <div class="card-icon">
-                          <i class="fa fa-twitter"></i>
+                          <i class="material-icons">euro_symbol</i>
                       </div>
-                      <p class="card-category">Followers</p>
-                      <h3 class="card-title">+245</h3>
+                      <p class="card-category">Revenus Totaux</p>
+                      <h3 class="card-title">{{ dashboardStats.revenue | currency:'EUR' }}</h3>
                   </div>
                   <div class="card-footer">
                       <div class="stats">
-                          <i class="material-icons">update</i> Just Updated
+                          <i class="material-icons text-success">trending_up</i>
+                          <span class="text-success">+15% ce mois</span>
                       </div>
                   </div>
               </div>
           </div>
       </div>
+
+      <!-- Événements récents et réservations -->
       <div class="row">
-          <div class="col-md-4">
-              <div class="card card-chart">
-                  <div class="card-header card-header-success">
-                      <div class="ct-chart" id="dailySalesChart"></div>
+          <div class="col-md-6">
+              <div class="card">
+                  <div class="card-header card-header-primary">
+                      <h4 class="card-title">Événements Récents</h4>
+                      <p class="card-category">Derniers événements créés</p>
                   </div>
                   <div class="card-body">
-                      <h4 class="card-title">Daily Sales</h4>
-                      <p class="card-category">
-                          <span class="text-success"><i class="fa fa-long-arrow-up"></i> 55% </span> increase in today sales.</p>
-                  </div>
-                  <div class="card-footer">
-                      <div class="stats">
-                          <i class="material-icons">access_time</i> updated 4 minutes ago
+                      <div class="table-responsive">
+                          <table class="table">
+                              <thead class="text-primary">
+                                  <tr>
+                                      <th>Nom</th>
+                                      <th>Date</th>
+                                      <th>Réservations</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr *ngFor="let event of recentEvents">
+                                      <td>{{ event.nom }}</td>
+                                      <td>{{ event.date | date:'short' }}</td>
+                                      <td>
+                                          <span class="badge badge-info">{{ event.reservations }}</span>
+                                      </td>
+                                  </tr>
+                              </tbody>
+                          </table>
                       </div>
                   </div>
               </div>
           </div>
-          <div class="col-md-4">
-              <div class="card card-chart">
-                  <div class="card-header card-header-warning">
-                      <div class="ct-chart" id="websiteViewsChart"></div>
+          <div class="col-md-6">
+              <div class="card">
+                  <div class="card-header card-header-success">
+                      <h4 class="card-title">Réservations Récentes</h4>
+                      <p class="card-category">Dernières réservations effectuées</p>
                   </div>
                   <div class="card-body">
-                      <h4 class="card-title">Email Subscriptions</h4>
-                      <p class="card-category">Last Campaign Performance</p>
+                      <div class="table-responsive">
+                          <table class="table">
+                              <thead class="text-primary">
+                                  <tr>
+                                      <th>Utilisateur</th>
+                                      <th>Événement</th>
+                                      <th>Statut</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr *ngFor="let reservation of recentReservations">
+                                      <td>{{ reservation.utilisateur }}</td>
+                                      <td>{{ reservation.evenement }}</td>
+                                      <td>
+                                          <span class="badge" 
+                                                [ngClass]="reservation.statut === 'CONFIRMEE' ? 'badge-success' : 'badge-warning'">
+                                              {{ reservation.statut === 'CONFIRMEE' ? 'Confirmée' : 'En attente' }}
+                                          </span>
+                                      </td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </div>
                   </div>
-                  <div class="card-footer">
-                      <div class="stats">
+              </div>
+          </div>
+      </div>
                           <i class="material-icons">access_time</i> campaign sent 2 days ago
                       </div>
                   </div>

@@ -1,0 +1,35 @@
+.card-stats {
+  margin-bottom: 20px;
+}
+
+.badge-success {
+  background-color: #4caf50;
+}
+
+.badge-warning {
+  background-color: #ff9800;
+}
+
+.badge-danger {
+  background-color: #f44336;
+}
+
+.badge-info {
+  background-color: #2196f3;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+}
+
+.td-actions .btn {
+  margin: 0 2px;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
