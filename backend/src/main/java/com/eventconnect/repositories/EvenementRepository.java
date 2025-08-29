@@ -200,6 +200,34 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
     List<Evenement> findByDateDebutGreaterThan(LocalDateTime date);
 
     /**
+     * Trouve les événements d'un organisateur dans une période donnée
+     * @param organisateur l'organisateur
+     * @param dateDebut date de début de la période
+     * @param dateFin date de fin de la période
+     * @return Liste des événements ordonnés par date de début
+     */
+    List<Evenement> findByOrganisateurAndDateDebutBetweenOrderByDateDebut(
+        Utilisateur organisateur, LocalDateTime dateDebut, LocalDateTime dateFin);
+
+    /**
+     * Trouve les événements en conflit avec une période donnée pour un organisateur
+     * @param organisateur l'organisateur
+     * @param dateDebut date de début de la période à vérifier
+     * @param dateFin date de fin de la période à vérifier
+     * @return Liste des événements en conflit
+     */
+    @Query("SELECT e FROM Evenement e WHERE e.organisateur = :organisateur " +
+           "AND e.actif = true " +
+           "AND ((e.dateDebut BETWEEN :dateDebut AND :dateFin) " +
+           "OR (e.dateFin BETWEEN :dateDebut AND :dateFin) " +
+           "OR (e.dateDebut <= :dateDebut AND e.dateFin >= :dateFin)) " +
+           "ORDER BY e.dateDebut")
+    List<Evenement> findEvenementsConflitPourOrganisateur(
+        @Param("organisateur") Utilisateur organisateur,
+        @Param("dateDebut") LocalDateTime dateDebut,
+        @Param("dateFin") LocalDateTime dateFin);
+
+    /**
      * Compte les places réservées pour un événement
      * @param evenementId l'ID de l'événement
      * @return le nombre de places réservées

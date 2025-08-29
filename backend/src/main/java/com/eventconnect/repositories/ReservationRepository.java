@@ -234,4 +234,45 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
            "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
     Integer countPlacesReserveesForEvenement(@Param("evenementId") Long evenementId);
+    /**
+     * Trouve les réservations d'un utilisateur dans une période donnée
+     * @param utilisateur l'utilisateur
+     * @param dateDebut date de début de la période
+     * @param dateFin date de fin de la période
+     * @return Liste des réservations ordonnées par date d'événement
+     */
+    @Query("SELECT r FROM Reservation r JOIN r.evenement e " +
+           "WHERE r.utilisateur = :utilisateur AND r.actif = true " +
+           "AND e.actif = true " +
+           "AND ((e.dateDebut BETWEEN :dateDebut AND :dateFin) " +
+           "OR (e.dateFin BETWEEN :dateDebut AND :dateFin) " +
+           "OR (e.dateDebut <= :dateDebut AND e.dateFin >= :dateFin)) " +
+           "ORDER BY e.dateDebut")
+    List<Reservation> findReservationsUtilisateurPourPeriode(
+        @Param("utilisateur") Utilisateur utilisateur,
+        @Param("dateDebut") LocalDateTime dateDebut,
+        @Param("dateFin") LocalDateTime dateFin);
+
+    /**
+     * Compte le nombre total de réservations confirmées d'un utilisateur
+     * @param utilisateur l'utilisateur
+     * @return le nombre de réservations confirmées
+     */
+    @Query("SELECT COUNT(r) FROM Reservation r " +
+           "WHERE r.utilisateur = :utilisateur AND r.statut = 'CONFIRMEE' AND r.actif = true")
+    Long countReservationsConfirmeesParUtilisateur(@Param("utilisateur") Utilisateur utilisateur);
+
+    /**
+     * Trouve les réservations récentes d'un utilisateur pour calcul de points
+     * @param utilisateur l'utilisateur
+     * @param dateDebut date à partir de laquelle compter les réservations
+     * @return Liste des réservations récentes
+     */
+    @Query("SELECT r FROM Reservation r " +
+           "WHERE r.utilisateur = :utilisateur AND r.statut = 'CONFIRMEE' " +
+           "AND r.actif = true AND r.dateReservation >= :dateDebut " +
+           "ORDER BY r.dateReservation DESC")
+    List<Reservation> findReservationsRecentesParUtilisateur(
+        @Param("utilisateur") Utilisateur utilisateur,
+        @Param("dateDebut") LocalDateTime dateDebut);
 }

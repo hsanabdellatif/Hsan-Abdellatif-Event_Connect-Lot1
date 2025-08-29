@@ -5,8 +5,10 @@ import com.eventconnect.entities.Utilisateur;
 import com.eventconnect.repositories.UtilisateurRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -292,5 +294,60 @@ public class UtilisateurService implements UserDetailsService {
     @Transactional(readOnly = true)
     public List<Utilisateur> obtenirUtilisateursAvecReservations() {
         return utilisateurRepository.findUtilisateursAvecReservations();
+    }
+
+    /**
+     * Vérifie si l'utilisateur connecté est le même que celui spécifié ou s'il est admin
+     * Utilisé pour les vérifications de sécurité dans les contrôleurs
+     * 
+     * @param utilisateurId ID de l'utilisateur à vérifier
+     * @return true si c'est le même utilisateur ou si l'utilisateur connecté est admin
+     */
+    public boolean isCurrentUserOrAdmin(Long utilisateurId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return false;
+            }
+
+            String currentUsername = authentication.getName();
+            
+            // Vérifier si l'utilisateur a le rôle ADMIN
+            boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+            
+            if (isAdmin) {
+                return true;
+            }
+
+            // Vérifier si c'est le même utilisateur
+            Utilisateur currentUser = trouverParEmail(currentUsername);
+            return currentUser != null && currentUser.getId().equals(utilisateurId);
+            
+        } catch (Exception e) {
+            log.error("Erreur lors de la vérification des droits d'accès: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtient l'utilisateur actuellement connecté
+     * 
+     * @return l'utilisateur connecté ou null si aucun utilisateur n'est connecté
+     */
+    public Utilisateur getCurrentUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return null;
+            }
+
+            String currentUsername = authentication.getName();
+            return trouverParEmail(currentUsername);
+            
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération de l'utilisateur connecté: {}", e.getMessage());
+            return null;
+        }
     }
 }

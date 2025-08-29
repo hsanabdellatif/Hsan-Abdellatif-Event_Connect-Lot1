@@ -60,12 +60,29 @@ public class Utilisateur {
     @Column(name = "actif")
     private Boolean actif = true;
 
+    // Système de fidélité
+    @Column(name = "points_fidelite")
+    private Integer pointsFidelite = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "niveau_fidelite")
+    private NiveauFidelite niveauFidelite = NiveauFidelite.BRONZE;
+
+    @Column(name = "total_reservations")
+    private Integer totalReservations = 0;
+
+    @Column(name = "total_evenements_organises")
+    private Integer totalEvenementsOrganises = 0;
+
     // Relations
     @OneToMany(mappedBy = "organisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Evenement> evenementsOrganises = new ArrayList<>();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reservation> reservations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UtilisateurBadge> badges = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -230,11 +247,103 @@ public class Utilisateur {
         this.reservations = reservations;
     }
 
+    public List<UtilisateurBadge> getBadges() {
+        return badges;
+    }
+
+    public void setBadges(List<UtilisateurBadge> badges) {
+        this.badges = badges;
+    }
+
+    public Integer getPointsFidelite() {
+        return pointsFidelite;
+    }
+
+    public void setPointsFidelite(Integer pointsFidelite) {
+        this.pointsFidelite = pointsFidelite;
+    }
+
+    public NiveauFidelite getNiveauFidelite() {
+        return niveauFidelite;
+    }
+
+    public void setNiveauFidelite(NiveauFidelite niveauFidelite) {
+        this.niveauFidelite = niveauFidelite;
+    }
+
+    public Integer getTotalReservations() {
+        return totalReservations;
+    }
+
+    public void setTotalReservations(Integer totalReservations) {
+        this.totalReservations = totalReservations;
+    }
+
+    public Integer getTotalEvenementsOrganises() {
+        return totalEvenementsOrganises;
+    }
+
+    public void setTotalEvenementsOrganises(Integer totalEvenementsOrganises) {
+        this.totalEvenementsOrganises = totalEvenementsOrganises;
+    }
+
     public List<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    /**
+     * Méthodes utilitaires pour la fidélité
+     */
+    public void ajouterPoints(int points) {
+        this.pointsFidelite += points;
+        this.mettreAJourNiveauFidelite();
+    }
+
+    public void incrementerReservations() {
+        this.totalReservations++;
+    }
+
+    public void incrementerEvenementsOrganises() {
+        this.totalEvenementsOrganises++;
+    }
+
+    private void mettreAJourNiveauFidelite() {
+        if (this.pointsFidelite >= 1000) {
+            this.niveauFidelite = NiveauFidelite.DIAMANT;
+        } else if (this.pointsFidelite >= 500) {
+            this.niveauFidelite = NiveauFidelite.OR;
+        } else if (this.pointsFidelite >= 100) {
+            this.niveauFidelite = NiveauFidelite.ARGENT;
+        } else {
+            this.niveauFidelite = NiveauFidelite.BRONZE;
+        }
+    }
+
+    /**
+     * Enum pour les niveaux de fidélité
+     */
+    public enum NiveauFidelite {
+        BRONZE("Bronze", 0, "#CD7F32"),
+        ARGENT("Argent", 100, "#C0C0C0"),
+        OR("Or", 500, "#FFD700"),
+        DIAMANT("Diamant", 1000, "#B9F2FF");
+
+        private final String libelle;
+        private final int pointsRequis;
+        private final String couleur;
+
+        NiveauFidelite(String libelle, int pointsRequis, String couleur) {
+            this.libelle = libelle;
+            this.pointsRequis = pointsRequis;
+            this.couleur = couleur;
+        }
+
+        public String getLibelle() { return libelle; }
+        public int getPointsRequis() { return pointsRequis; }
+        public String getCouleur() { return couleur; }
     }
 }
