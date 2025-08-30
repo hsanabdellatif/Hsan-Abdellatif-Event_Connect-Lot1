@@ -321,7 +321,7 @@ public class UtilisateurService implements UserDetailsService {
             }
 
             // Vérifier si c'est le même utilisateur
-            Utilisateur currentUser = trouverParEmail(currentUsername);
+            Utilisateur currentUser = findByEmail(currentUsername);
             return currentUser != null && currentUser.getId().equals(utilisateurId);
             
         } catch (Exception e) {
@@ -343,7 +343,7 @@ public class UtilisateurService implements UserDetailsService {
             }
 
             String currentUsername = authentication.getName();
-            return trouverParEmail(currentUsername);
+            return findByEmail(currentUsername);
             
         } catch (Exception e) {
             log.error("Erreur lors de la récupération de l'utilisateur connecté: {}", e.getMessage());
