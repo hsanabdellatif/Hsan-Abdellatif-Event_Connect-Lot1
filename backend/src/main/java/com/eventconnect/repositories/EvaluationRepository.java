@@ -175,7 +175,7 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
      * @return page d'évaluations avec commentaires
      */
     @Query("SELECT e FROM Evaluation e WHERE e.evenement = :evenement " +
-           "AND e.commentaire IS NOT NULL AND e.commentaire != '' " +
+           "AND e.commentaire IS NOT NULL AND LENGTH(e.commentaire) > 0 " +
            "AND e.visible = true AND e.actif = true " +
            "ORDER BY e.dateEvaluation DESC")
     Page<Evaluation> findEvaluationsAvecCommentaires(@Param("evenement") Evenement evenement, 

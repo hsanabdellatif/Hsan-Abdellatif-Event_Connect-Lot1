@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,9 +30,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
-
+    
     @Autowired
-    private UserDetailsService userDetailsService;
+    private ApplicationContext applicationContext;
+    
+    // Le UserDetailsService sera obtenu au besoin via applicationContext
+    // pour éviter la dépendance circulaire
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, 
@@ -42,7 +46,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String username = tokenProvider.getUsernameFromToken(jwt);
-
+                
+                // Obtention du service au moment de l'exécution pour éviter la dépendance circulaire
+                UserDetailsService userDetailsService = applicationContext.getBean(UserDetailsService.class);
+                
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = 
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
