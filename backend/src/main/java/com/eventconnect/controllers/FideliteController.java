@@ -20,7 +20,7 @@ import java.util.List;
  * @version 2.0.0
  */
 @RestController
-@RequestMapping("/api/fidelite")
+@RequestMapping("/fidelite")
 @CrossOrigin(origins = "*")
 public class FideliteController {
 
@@ -37,9 +37,8 @@ public class FideliteController {
      * @return le profil de fidélité
      */
     @GetMapping("/profil/{utilisateurId}")
-    @PreAuthorize("hasRole('ADMIN') or #utilisateurId == authentication.principal.id")
     public ResponseEntity<Utilisateur> obtenirProfilFidelite(@PathVariable Long utilisateurId) {
-        log.info("GET /api/fidelite/profil/{} - Récupération du profil de fidélité", utilisateurId);
+        log.info("GET /fidelite/profil/{} - Récupération du profil de fidélité", utilisateurId);
         
         try {
             Utilisateur profil = fideliteService.obtenirProfilFidelite(utilisateurId);
@@ -59,9 +58,8 @@ public class FideliteController {
      * @return la liste des badges de l'utilisateur
      */
     @GetMapping("/badges/{utilisateurId}")
-    @PreAuthorize("hasRole('ADMIN') or #utilisateurId == authentication.principal.id")
     public ResponseEntity<List<UtilisateurBadge>> obtenirBadgesUtilisateur(@PathVariable Long utilisateurId) {
-        log.info("GET /api/fidelite/badges/{} - Récupération des badges de l'utilisateur", utilisateurId);
+        log.info("GET /fidelite/badges/{} - Récupération des badges de l'utilisateur", utilisateurId);
         
         try {
             List<UtilisateurBadge> badges = fideliteService.obtenirBadgesUtilisateur(utilisateurId);
@@ -81,9 +79,8 @@ public class FideliteController {
      * @return la liste des prochains badges atteignables
      */
     @GetMapping("/prochains-badges/{utilisateurId}")
-    @PreAuthorize("hasRole('ADMIN') or #utilisateurId == authentication.principal.id")
     public ResponseEntity<List<Badge>> obtenirProchainsBadges(@PathVariable Long utilisateurId) {
-        log.info("GET /api/fidelite/prochains-badges/{} - Récupération des prochains badges", utilisateurId);
+        log.info("GET /fidelite/prochains-badges/{} - Récupération des prochains badges", utilisateurId);
         
         try {
             List<Badge> prochainsBadges = fideliteService.obtenirProchainsBadges(utilisateurId);
@@ -104,11 +101,10 @@ public class FideliteController {
      * @return la liste des nouveaux badges obtenus
      */
     @PostMapping("/attribuer-points/{utilisateurId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Badge>> attribuerPoints(
             @PathVariable Long utilisateurId,
             @RequestParam Integer points) {
-        log.info("POST /api/fidelite/attribuer-points/{} - Attribution de {} points", utilisateurId, points);
+        log.info("POST /fidelite/attribuer-points/{} - Attribution de {} points", utilisateurId, points);
         
         try {
             if (points <= 0) {
@@ -132,7 +128,7 @@ public class FideliteController {
      */
     @GetMapping("/badges")
     public ResponseEntity<List<Badge>> obtenirTousLesBadges() {
-        log.info("GET /api/fidelite/badges - Récupération de tous les badges");
+        log.info("GET /fidelite/badges - Récupération de tous les badges");
         
         try {
             List<Badge> badges = fideliteService.obtenirTousLesBadges();
@@ -149,9 +145,8 @@ public class FideliteController {
      * @return réponse de succès
      */
     @PostMapping("/recompenser-reservation/{utilisateurId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANISATEUR')")
     public ResponseEntity<String> recompenserReservation(@PathVariable Long utilisateurId) {
-        log.info("POST /api/fidelite/recompenser-reservation/{} - Récompense pour réservation", utilisateurId);
+        log.info("POST /fidelite/recompenser-reservation/{} - Récompense pour réservation", utilisateurId);
         
         try {
             fideliteService.recompenserReservation(utilisateurId);
@@ -171,9 +166,8 @@ public class FideliteController {
      * @return réponse de succès
      */
     @PostMapping("/recompenser-organisation/{utilisateurId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANISATEUR')")
     public ResponseEntity<String> recompenserOrganisation(@PathVariable Long utilisateurId) {
-        log.info("POST /api/fidelite/recompenser-organisation/{} - Récompense pour organisation", utilisateurId);
+        log.info("POST /fidelite/recompenser-organisation/{} - Récompense pour organisation", utilisateurId);
         
         try {
             fideliteService.recompenserOrganisation(utilisateurId);

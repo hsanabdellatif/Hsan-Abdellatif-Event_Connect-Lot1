@@ -19,7 +19,7 @@ import java.util.Optional;
  * @version 2.0.0
  */
 @RestController
-@RequestMapping("/api/utilisateurs")
+@RequestMapping("/utilisateurs")
 @CrossOrigin(origins = "*")
 public class UtilisateurController {
 
@@ -37,7 +37,7 @@ public class UtilisateurController {
      */
     @PostMapping
     public ResponseEntity<Utilisateur> creerUtilisateur(@Valid @RequestBody Utilisateur utilisateur) {
-        log.info("POST /api/utilisateurs - Création d'un utilisateur avec email: {}", utilisateur.getEmail());
+        log.info("POST /utilisateurs - Création d'un utilisateur avec email: {}", utilisateur.getEmail());
         
         try {
             Utilisateur nouvelUtilisateur = utilisateurService.creerUtilisateur(utilisateur);
@@ -58,7 +58,7 @@ public class UtilisateurController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Utilisateur> obtenirUtilisateur(@PathVariable Long id) {
-        log.info("GET /api/utilisateurs/{} - Récupération de l'utilisateur", id);
+        log.info("GET /utilisateurs/{} - Récupération de l'utilisateur", id);
         
         try {
             Utilisateur utilisateur = utilisateurService.obtenirUtilisateurParId(id);
@@ -75,7 +75,7 @@ public class UtilisateurController {
      */
     @GetMapping
     public ResponseEntity<List<Utilisateur>> obtenirTousLesUtilisateurs() {
-        log.info("GET /api/utilisateurs - Récupération de tous les utilisateurs");
+        log.info("GET /utilisateurs - Récupération de tous les utilisateurs");
         
         try {
             List<Utilisateur> utilisateurs = utilisateurService.obtenirTousLesUtilisateursActifs();
@@ -96,7 +96,7 @@ public class UtilisateurController {
     public ResponseEntity<Utilisateur> mettreAJourUtilisateur(
             @PathVariable Long id, 
             @Valid @RequestBody Utilisateur utilisateur) {
-        log.info("PUT /api/utilisateurs/{} - Mise à jour de l'utilisateur", id);
+        log.info("PUT /utilisateurs/{} - Mise à jour de l'utilisateur", id);
         
         try {
             Utilisateur utilisateurMisAJour = utilisateurService.mettreAJourUtilisateur(id, utilisateur);
@@ -117,7 +117,7 @@ public class UtilisateurController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> supprimerUtilisateur(@PathVariable Long id) {
-        log.info("DELETE /api/utilisateurs/{} - Suppression de l'utilisateur", id);
+        log.info("DELETE /utilisateurs/{} - Suppression de l'utilisateur", id);
         
         try {
             utilisateurService.supprimerUtilisateur(id);
@@ -138,7 +138,7 @@ public class UtilisateurController {
      */
     @GetMapping("/recherche")
     public ResponseEntity<Utilisateur> rechercherParEmail(@RequestParam String email) {
-        log.info("GET /api/utilisateurs/recherche?email={} - Recherche par email", email);
+        log.info("GET /utilisateurs/recherche?email={} - Recherche par email", email);
         
         try {
             Optional<Utilisateur> utilisateur = utilisateurService.obtenirUtilisateurParEmail(email);
@@ -157,7 +157,7 @@ public class UtilisateurController {
      */
     @GetMapping("/count")
     public ResponseEntity<Long> compterUtilisateurs() {
-        log.info("GET /api/utilisateurs/count - Comptage des utilisateurs");
+        log.info("GET /utilisateurs/count - Comptage des utilisateurs");
         
         try {
             long nombreUtilisateurs = utilisateurService.compterUtilisateursActifs();
@@ -175,7 +175,7 @@ public class UtilisateurController {
      */
     @GetMapping("/exists")
     public ResponseEntity<Boolean> verifierExistenceEmail(@RequestParam String email) {
-        log.info("GET /api/utilisateurs/exists?email={} - Vérification d'existence", email);
+        log.info("GET /utilisateurs/exists?email={} - Vérification d'existence", email);
         
         try {
             boolean existe = utilisateurService.existsByEmail(email);

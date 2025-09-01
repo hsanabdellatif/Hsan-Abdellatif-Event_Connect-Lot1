@@ -1,5 +1,6 @@
 package com.eventconnect.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -83,6 +84,7 @@ public class Evenement {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisateur_id", nullable = false)
     @NotNull(message = "L'organisateur est obligatoire")
+    @JsonBackReference
     private Utilisateur organisateur;
 
     @OneToMany(mappedBy = "evenement", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

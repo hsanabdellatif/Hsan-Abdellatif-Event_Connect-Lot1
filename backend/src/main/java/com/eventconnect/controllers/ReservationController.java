@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 /**
@@ -19,7 +21,7 @@ import java.util.Optional;
  * @version 2.0.0
  */
 @RestController
-@RequestMapping("/api/reservations")
+@RequestMapping("/reservations")
 @CrossOrigin(origins = "*")
 public class ReservationController {
 
@@ -43,7 +45,7 @@ public class ReservationController {
             @RequestParam Long evenementId,
             @RequestParam Integer nombrePlaces) {
         
-        log.info("POST /api/reservations - Création d'une réservation (utilisateur: {}, événement: {}, places: {})", 
+        log.info("POST /reservations - Création d'une réservation (utilisateur: {}, événement: {}, places: {})",
                 utilisateurId, evenementId, nombrePlaces);
         
         try {
@@ -65,7 +67,7 @@ public class ReservationController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Reservation> obtenirReservation(@PathVariable Long id) {
-        log.info("GET /api/reservations/{} - Récupération de la réservation", id);
+        log.info("GET /reservations/{} - Récupération de la réservation", id);
         
         Optional<Reservation> reservation = reservationService.trouverParId(id);
         return reservation
@@ -80,7 +82,7 @@ public class ReservationController {
      */
     @PutMapping("/{id}/confirmer")
     public ResponseEntity<Reservation> confirmerReservation(@PathVariable Long id) {
-        log.info("PUT /api/reservations/{}/confirmer - Confirmation de la réservation", id);
+        log.info("PUT /reservations/{}/confirmer - Confirmation de la réservation", id);
         
         try {
             Reservation reservationConfirmee = reservationService.confirmerReservation(id);
@@ -101,7 +103,7 @@ public class ReservationController {
      */
     @PutMapping("/{id}/annuler")
     public ResponseEntity<Reservation> annulerReservation(@PathVariable Long id) {
-        log.info("PUT /api/reservations/{}/annuler - Annulation de la réservation", id);
+        log.info("PUT /reservations/{}/annuler - Annulation de la réservation", id);
         
         try {
             Reservation reservationAnnulee = reservationService.annulerReservation(id);
@@ -122,7 +124,7 @@ public class ReservationController {
      */
     @GetMapping("/utilisateur/{utilisateurId}")
     public ResponseEntity<List<Reservation>> obtenirReservationsUtilisateur(@PathVariable Long utilisateurId) {
-        log.info("GET /api/reservations/utilisateur/{} - Récupération des réservations de l'utilisateur", utilisateurId);
+        log.info("GET /reservations/utilisateur/{} - Récupération des réservations de l'utilisateur", utilisateurId);
         
         try {
             List<Reservation> reservations = reservationService.obtenirReservationsUtilisateur(utilisateurId);
@@ -143,7 +145,7 @@ public class ReservationController {
      */
     @GetMapping("/evenement/{evenementId}")
     public ResponseEntity<List<Reservation>> obtenirReservationsEvenement(@PathVariable Long evenementId) {
-        log.info("GET /api/reservations/evenement/{} - Récupération des réservations de l'événement", evenementId);
+        log.info("GET /reservations/evenement/{} - Récupération des réservations de l'événement", evenementId);
         
         try {
             List<Reservation> reservations = reservationService.obtenirReservationsEvenement(evenementId);
@@ -164,7 +166,7 @@ public class ReservationController {
      */
     @GetMapping("/statut/{statut}")
     public ResponseEntity<List<Reservation>> obtenirReservationsParStatut(@PathVariable Reservation.StatutReservation statut) {
-        log.info("GET /api/reservations/statut/{} - Récupération des réservations par statut", statut);
+        log.info("GET /reservations/statut/{} - Récupération des réservations par statut", statut);
         
         try {
             List<Reservation> reservations = reservationService.obtenirReservationsParStatut(statut);
@@ -182,7 +184,7 @@ public class ReservationController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> supprimerReservation(@PathVariable Long id) {
-        log.info("DELETE /api/reservations/{} - Suppression de la réservation", id);
+        log.info("DELETE /reservations/{} - Suppression de la réservation", id);
         
         try {
             reservationService.supprimerReservation(id);
@@ -203,7 +205,7 @@ public class ReservationController {
      */
     @GetMapping("/evenement/{evenementId}/chiffre-affaires")
     public ResponseEntity<BigDecimal> calculerChiffreAffairesEvenement(@PathVariable Long evenementId) {
-        log.info("GET /api/reservations/evenement/{}/chiffre-affaires - Calcul du chiffre d'affaires", evenementId);
+        log.info("GET /reservations/evenement/{}/chiffre-affaires - Calcul du chiffre d'affaires", evenementId);
         
         try {
             BigDecimal chiffreAffaires = reservationService.calculerChiffreAffairesEvenement(evenementId);
@@ -220,13 +222,30 @@ public class ReservationController {
      */
     @GetMapping("/count")
     public ResponseEntity<Long> compterReservations() {
-        log.info("GET /api/reservations/count - Comptage des réservations");
+        log.info("GET /reservations/count - Comptage des réservations");
         
         try {
             long nombreReservations = reservationService.compterReservations();
             return ResponseEntity.ok(nombreReservations);
         } catch (Exception e) {
             log.error("Erreur lors du comptage des réservations", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<?> getStats() {
+        log.info("GET /reservations/stats - Récupération des statistiques des réservations");
+        try {
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("total", reservationService.compterReservations());
+            stats.put("confirmes", reservationService.obtenirReservationsParStatut(Reservation.StatutReservation.CONFIRMEE).size());
+            stats.put("enAttente", reservationService.obtenirReservationsParStatut(Reservation.StatutReservation.EN_ATTENTE).size());
+            stats.put("annulees", reservationService.obtenirReservationsParStatut(Reservation.StatutReservation.ANNULEE).size());
+            
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération des statistiques", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -238,7 +257,7 @@ public class ReservationController {
      */
     @GetMapping("/evenement/{evenementId}/places-reservees")
     public ResponseEntity<Integer> compterPlacesReservees(@PathVariable Long evenementId) {
-        log.info("GET /api/reservations/evenement/{}/places-reservees - Comptage des places réservées", evenementId);
+        log.info("GET /reservations/evenement/{}/places-reservees - Comptage des places réservées", evenementId);
         
         try {
             Integer placesReservees = reservationService.compterPlacesReservees(evenementId);

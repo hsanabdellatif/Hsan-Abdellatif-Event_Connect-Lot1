@@ -56,24 +56,8 @@ public class SecurityConfig {
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Endpoints publics
-                .requestMatchers("/auth/**", "/api/auth/**").permitAll()
-                .requestMatchers("/api/health").permitAll()
-                // Documentation API (optionnel)
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // Endpoints pour les organisateurs
-                .requestMatchers("/evenements").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
-                .requestMatchers("/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
-                // Gestion des événements - création, modification, suppression
-                .requestMatchers(org.springframework.http.HttpMethod.POST, "/evenements").hasAnyRole("ADMIN", "ORGANISATEUR")
-                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR")
-                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR")
-                // Réservations
-                .requestMatchers("/reservations/**").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
-                // Administration des utilisateurs
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                // Tous les autres endpoints nécessitent une authentification
-                .anyRequest().authenticated()
+                // Autoriser tous les endpoints pour tous
+                .anyRequest().permitAll()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

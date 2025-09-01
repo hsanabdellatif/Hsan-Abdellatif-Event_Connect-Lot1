@@ -21,8 +21,10 @@ export class AuthService {
   }
 
   login(email: string, password: string) {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, password })
-      .pipe(tap(user => {
+    return this.http.post<any>(`${this.apiUrl}/login`, { 
+      email, 
+      motDePasse: password // Transformer password en motDePasse pour correspondre au backend
+    }).pipe(tap(user => {
         localStorage.setItem('currentUser', JSON.stringify(user));
         this.currentUserSubject.next(user);
         return user;
@@ -30,7 +32,13 @@ export class AuthService {
   }
 
   register(userData: any) {
-    return this.http.post(`${this.apiUrl}/register`, userData);
+    // Transformer le champ password en motDePasse pour correspondre au backend
+    const transformedData = {
+      ...userData,
+      motDePasse: userData.password
+    };
+    delete transformedData.password;
+    return this.http.post(`${this.apiUrl}/register`, transformedData);
   }
 
   logout() {

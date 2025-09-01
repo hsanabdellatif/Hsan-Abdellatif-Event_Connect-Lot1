@@ -100,6 +100,7 @@ public class AuthController {
             utilisateur.setPrenom(registerRequest.getPrenom());
             utilisateur.setEmail(registerRequest.getEmail());
             utilisateur.setMotDePasse(passwordEncoder.encode(registerRequest.getMotDePasse()));
+            utilisateur.setTelephone(registerRequest.getTelephone());
 
             // Assigner le rôle PARTICIPANT par défaut
             Role participantRole = roleRepository.findByNom("PARTICIPANT")

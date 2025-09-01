@@ -25,7 +25,7 @@ import java.util.Map;
  * @since 2.0.0
  */
 @RestController
-@RequestMapping("/api/feedbacks")
+@RequestMapping("/feedbacks")
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:3000"})
 public class FeedbackController {
 
@@ -43,7 +43,6 @@ public class FeedbackController {
      * @return l'évaluation créée/mise à jour
      */
     @PostMapping("/evaluations")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Evaluation> evaluerEvenement(@Valid @RequestBody EvaluationRequest evaluationRequest) {
         logger.info("Demande d'évaluation événement: utilisateur={}, événement={}, note={}", 
                    evaluationRequest.getUtilisateurId(), evaluationRequest.getEvenementId(), 
@@ -128,7 +127,6 @@ public class FeedbackController {
      * @return confirmation
      */
     @PostMapping("/evaluations/{evaluationId}/utile")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> marquerEvaluationUtile(@PathVariable Long evaluationId) {
         logger.info("Marquage évaluation {} comme utile", evaluationId);
 
@@ -149,7 +147,6 @@ public class FeedbackController {
      * @return confirmation
      */
     @PostMapping("/evaluations/{evaluationId}/signaler")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> signalerEvaluation(@PathVariable Long evaluationId) {
         logger.info("Signalement évaluation {}", evaluationId);
 
@@ -172,7 +169,6 @@ public class FeedbackController {
      * @return l'enquête créée
      */
     @PostMapping("/enquetes")
-    @PreAuthorize("hasRole('ADMIN') or @utilisateurService.isCurrentUserOrAdmin(#enqueteRequest.organisateurId)")
     public ResponseEntity<EnqueteSatisfaction> creerEnqueteSatisfaction(
             @Valid @RequestBody EnqueteRequest enqueteRequest) {
         
@@ -241,7 +237,6 @@ public class FeedbackController {
      * @return statistiques de l'enquête
      */
     @GetMapping("/enquetes/statistiques/{enqueteId}")
-    @PreAuthorize("hasRole('ADMIN') or @utilisateurService.isCurrentUserOrAdmin(#enqueteId)")
     public ResponseEntity<Map<String, Object>> obtenirStatistiquesEnquete(@PathVariable Long enqueteId) {
         logger.info("Demande statistiques enquête {}", enqueteId);
 

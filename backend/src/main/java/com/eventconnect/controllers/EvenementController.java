@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Contrôleur REST pour la gestion des événements
@@ -23,7 +26,7 @@ import java.util.Optional;
  * @version 2.0.0
  */
 @RestController
-@RequestMapping("/api/evenements")
+@RequestMapping("/evenements")
 @CrossOrigin(origins = "*")
 public class EvenementController {
 
@@ -41,7 +44,7 @@ public class EvenementController {
      */
     @PostMapping
     public ResponseEntity<Evenement> creerEvenement(@Valid @RequestBody Evenement evenement) {
-        log.info("POST /api/evenements - Création d'un événement: {}", evenement.getTitre());
+        log.info("POST /evenements - Création d'un événement: {}", evenement.getTitre());
         
         try {
             Evenement nouvelEvenement = evenementService.creerEvenement(evenement);
@@ -62,7 +65,7 @@ public class EvenementController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Evenement> obtenirEvenement(@PathVariable Long id) {
-        log.info("GET /api/evenements/{} - Récupération de l'événement", id);
+        log.info("GET /evenements/{} - Récupération de l'événement", id);
         
         Optional<Evenement> evenement = evenementService.trouverParId(id);
         return evenement
@@ -85,7 +88,7 @@ public class EvenementController {
             @RequestParam(defaultValue = "dateDebut") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         
-        log.info("GET /api/evenements - Récupération des événements (page: {}, taille: {})", page, size);
+        log.info("GET /evenements - Récupération des événements (page: {}, taille: {})", page, size);
         
         try {
             Sort sort = sortDir.equalsIgnoreCase("desc") ? 
@@ -112,7 +115,7 @@ public class EvenementController {
     public ResponseEntity<Evenement> mettreAJourEvenement(
             @PathVariable Long id, 
             @Valid @RequestBody Evenement evenement) {
-        log.info("PUT /api/evenements/{} - Mise à jour de l'événement", id);
+        log.info("PUT /evenements/{} - Mise à jour de l'événement", id);
         
         try {
             Evenement evenementMisAJour = evenementService.mettreAJourEvenement(id, evenement);
@@ -136,7 +139,7 @@ public class EvenementController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> supprimerEvenement(@PathVariable Long id) {
-        log.info("DELETE /api/evenements/{} - Suppression de l'événement", id);
+        log.info("DELETE /evenements/{} - Suppression de l'événement", id);
         
         try {
             evenementService.supprimerEvenement(id);
@@ -157,7 +160,7 @@ public class EvenementController {
      */
     @GetMapping("/recherche")
     public ResponseEntity<List<Evenement>> rechercherParTitre(@RequestParam String titre) {
-        log.info("GET /api/evenements/recherche?titre={} - Recherche par titre", titre);
+        log.info("GET /evenements/recherche?titre={} - Recherche par titre", titre);
         
         try {
             List<Evenement> evenements = evenementService.rechercherParTitre(titre);
@@ -174,7 +177,7 @@ public class EvenementController {
      */
     @GetMapping("/futurs")
     public ResponseEntity<List<Evenement>> obtenirEvenementsFuturs() {
-        log.info("GET /api/evenements/futurs - Récupération des événements futurs");
+        log.info("GET /evenements/futurs - Récupération des événements futurs");
         
         try {
             List<Evenement> evenements = evenementService.obtenirEvenementsFuturs();
@@ -192,7 +195,7 @@ public class EvenementController {
      */
     @GetMapping("/categorie/{categorie}")
     public ResponseEntity<List<Evenement>> obtenirEvenementsParCategorie(@PathVariable String categorie) {
-        log.info("GET /api/evenements/categorie/{} - Récupération par catégorie", categorie);
+        log.info("GET /evenements/categorie/{} - Récupération par catégorie", categorie);
         
         try {
             List<Evenement> evenements = evenementService.obtenirEvenementsParCategorie(categorie);
@@ -209,7 +212,7 @@ public class EvenementController {
      */
     @GetMapping("/disponibles")
     public ResponseEntity<List<Evenement>> obtenirEvenementsDisponibles() {
-        log.info("GET /api/evenements/disponibles - Récupération des événements disponibles");
+        log.info("GET /evenements/disponibles - Récupération des événements disponibles");
         
         try {
             List<Evenement> evenements = evenementService.obtenirEvenementsDisponibles();
@@ -230,7 +233,7 @@ public class EvenementController {
     public ResponseEntity<Boolean> verifierDisponibilite(
             @PathVariable Long id, 
             @RequestParam Integer nombrePlaces) {
-        log.info("GET /api/evenements/{}/disponibilite?nombrePlaces={}", id, nombrePlaces);
+        log.info("GET /evenements/{}/disponibilite?nombrePlaces={}", id, nombrePlaces);
         
         try {
             boolean disponible = evenementService.verifierDisponibilite(id, nombrePlaces);
@@ -250,13 +253,47 @@ public class EvenementController {
      */
     @GetMapping("/count")
     public ResponseEntity<Long> compterEvenements() {
-        log.info("GET /api/evenements/count - Comptage des événements");
+        log.info("GET /evenements/count - Comptage des événements");
         
         try {
             long nombreEvenements = evenementService.compterEvenements();
             return ResponseEntity.ok(nombreEvenements);
         } catch (Exception e) {
             log.error("Erreur lors du comptage des événements", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<?> getStats() {
+        log.info("GET /evenements/stats - Récupération des statistiques des événements");
+        try {
+            long total = evenementService.compterEvenements();
+            long evenementsFuturs = evenementService.obtenirEvenementsFuturs().size();
+            long evenementsDisponibles = evenementService.obtenirEvenementsDisponibles().size();
+            
+            var stats = new HashMap<String, Object>();
+            stats.put("total", total);
+            stats.put("futurs", evenementsFuturs);
+            stats.put("disponibles", evenementsDisponibles);
+            
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération des statistiques", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/actifs")
+    public ResponseEntity<?> getEvenementsActifs() {
+        log.info("GET /evenements/actifs - Récupération des événements actifs");
+        try {
+            List<Evenement> evenementsActifs = evenementService.obtenirEvenementsFuturs().stream()
+                .filter(e -> e.getStatut() == Evenement.StatutEvenement.PLANIFIE)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(evenementsActifs);
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération des événements actifs", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -25,9 +25,9 @@ public class JwtTokenProvider {
     private final int jwtExpirationMs;
 
     public JwtTokenProvider(
-            @Value("${app.jwt.secret:mySecretKey123456789012345678901234567890}") String jwtSecret,
             @Value("${app.jwt.expiration:86400000}") int jwtExpirationMs) {
-        this.jwtSecret = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        // Génération d'une clé sécurisée pour HS512
+        this.jwtSecret = Keys.secretKeyFor(SignatureAlgorithm.HS512);
         this.jwtExpirationMs = jwtExpirationMs;
     }
 

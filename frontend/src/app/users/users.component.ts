@@ -7,68 +7,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class UsersComponent implements OnInit {
 
-  users: any[] = [
-    {
-      id: 1,
-      nom: 'Dupont',
-      prenom: 'Jean',
-      email: 'jean.dupont@email.com',
-      telephone: '+33123456789',
-      dateInscription: '2025-01-15T10:30:00',
-      actif: true,
-      nombreReservations: 3,
-      totalDepense: 450.00,
-      role: 'USER'
-    },
-    {
-      id: 2,
-      nom: 'Martin',
-      prenom: 'Marie',
-      email: 'marie.martin@email.com',
-      telephone: '+33987654321',
-      dateInscription: '2025-02-20T14:15:00',
-      actif: true,
-      nombreReservations: 1,
-      totalDepense: 200.00,
-      role: 'USER'
-    },
-    {
-      id: 3,
-      nom: 'Durand',
-      prenom: 'Pierre',
-      email: 'pierre.durand@email.com',
-      telephone: '+33456789123',
-      dateInscription: '2025-03-10T09:00:00',
-      actif: true,
-      nombreReservations: 5,
-      totalDepense: 0.00,
-      role: 'USER'
-    },
-    {
-      id: 4,
-      nom: 'Admin',
-      prenom: 'Super',
-      email: 'admin@eventconnect.com',
-      telephone: '+33111222333',
-      dateInscription: '2025-01-01T00:00:00',
-      actif: true,
-      nombreReservations: 0,
-      totalDepense: 0.00,
-      role: 'ADMIN'
-    },
-    {
-      id: 5,
-      nom: 'Leroy',
-      prenom: 'Sophie',
-      email: 'sophie.leroy@email.com',
-      telephone: '+33222333444',
-      dateInscription: '2025-08-01T16:45:00',
-      actif: false,
-      nombreReservations: 2,
-      totalDepense: 300.00,
-      role: 'USER'
-    }
-  ];
+  users: any[] = [];
 
   constructor() { }
 

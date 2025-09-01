@@ -25,6 +25,10 @@ public class RegisterRequest {
     @Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")
     private String motDePasse;
 
+    @NotBlank(message = "Le numéro de téléphone est obligatoire")
+    @Size(max = 15, message = "Le téléphone ne peut pas dépasser 15 caractères")
+    private String telephone;
+
     public RegisterRequest() {}
 
     public RegisterRequest(String nom, String prenom, String email, String motDePasse) {
@@ -64,5 +68,13 @@ public class RegisterRequest {
 
     public void setMotDePasse(String motDePasse) {
         this.motDePasse = motDePasse;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
     }
 }

@@ -12,7 +12,7 @@ import java.util.Map;
  * Contrôleur de test pour vérifier l'API
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/test")
 public class TestController {
 
     @GetMapping("/health")

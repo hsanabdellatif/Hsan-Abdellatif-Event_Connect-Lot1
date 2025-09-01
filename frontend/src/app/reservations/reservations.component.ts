@@ -7,48 +7,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ReservationsComponent implements OnInit {
 
-  reservations: any[] = [
-    {
-      id: 1,
-      utilisateurNom: 'Jean Dupont',
-      utilisateurEmail: 'jean.dupont@email.com',
-      evenementNom: 'Conférence Tech 2025',
-      dateReservation: '2025-08-15T10:30:00',
-      nombrePlaces: 2,
-      prixTotal: 300.00,
-      statut: 'CONFIRMEE'
-    },
-    {
-      id: 2,
-      utilisateurNom: 'Marie Martin',
-      utilisateurEmail: 'marie.martin@email.com',
-      evenementNom: 'Workshop Angular',
-      dateReservation: '2025-08-20T14:15:00',
-      nombrePlaces: 1,
-      prixTotal: 200.00,
-      statut: 'EN_ATTENTE'
-    },
-    {
-      id: 3,
-      utilisateurNom: 'Pierre Durand',
-      utilisateurEmail: 'pierre.durand@email.com',
-      evenementNom: 'Meetup DevOps',
-      dateReservation: '2025-08-25T09:00:00',
-      nombrePlaces: 1,
-      prixTotal: 0.00,
-      statut: 'CONFIRMEE'
-    },
-    {
-      id: 4,
-      utilisateurNom: 'Sophie Leroy',
-      utilisateurEmail: 'sophie.leroy@email.com',
-      evenementNom: 'Conférence Tech 2025',
-      dateReservation: '2025-08-22T16:45:00',
-      nombrePlaces: 1,
-      prixTotal: 150.00,
-      statut: 'ANNULEE'
-    }
-  ];
+  reservations: any[] = [];
 
   constructor() { }
 

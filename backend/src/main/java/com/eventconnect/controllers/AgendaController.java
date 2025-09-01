@@ -25,7 +25,7 @@ import java.util.Map;
  * @since 2.0.0
  */
 @RestController
-@RequestMapping("/api/agenda")
+@RequestMapping("/agenda")
 @CrossOrigin(origins = { "http://localhost:4200", "http://localhost:3000" })
 public class AgendaController {
 
@@ -44,7 +44,6 @@ public class AgendaController {
      * @return Résultat de la vérification avec les détails des conflits
      */
     @GetMapping("/conflits/{organisateurId}")
-    @PreAuthorize("hasRole('ADMIN') or @utilisateurService.isCurrentUserOrAdmin(#organisateurId)")
     public ResponseEntity<VerificationConflitDto> verifierConflits(
             @PathVariable Long organisateurId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateDebut,
@@ -106,7 +105,6 @@ public class AgendaController {
      * @return Résultat de la vérification avec les détails des conflits
      */
     @GetMapping("/conflits/reservations/{utilisateurId}")
-    @PreAuthorize("hasRole('ADMIN') or @utilisateurService.isCurrentUserOrAdmin(#utilisateurId)")
     public ResponseEntity<VerificationConflitDto> verifierConflitsReservations(
             @PathVariable Long utilisateurId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateDebut,
@@ -149,7 +147,6 @@ public class AgendaController {
      * @return Liste des créneaux libres proposés
      */
     @GetMapping("/creneaux-libres/{organisateurId}")
-    @PreAuthorize("hasRole('ADMIN') or @utilisateurService.isCurrentUserOrAdmin(#organisateurId)")
     public ResponseEntity<List<CreneauLibreDto>> proposerCreneauxLibres(
             @PathVariable Long organisateurId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateDebut,
