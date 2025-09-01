@@ -3,6 +3,7 @@ package com.eventconnect.repositories;
 import com.eventconnect.entities.Evenement;
 import com.eventconnect.entities.Reservation;
 import com.eventconnect.entities.Utilisateur;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -197,16 +198,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     /**
      * Trouve les utilisateurs les plus actifs (avec le plus de réservations)
-     * @param limit nombre maximum d'utilisateurs à retourner
+     * @param pageable pagination pour limiter les résultats
      * @return Liste des utilisateurs les plus actifs
      */
-    @Query(value = "SELECT u.* FROM utilisateurs u " +
-                   "INNER JOIN reservations r ON u.id = r.utilisateur_id " +
-                   "WHERE r.actif = true AND r.statut = 'CONFIRMEE' " +
-                   "GROUP BY u.id " +
-                   "ORDER BY COUNT(r.id) DESC " +
-                   "LIMIT :limit", nativeQuery = true)
-    List<Utilisateur> findUtilisateursLesPlusActifs(@Param("limit") int limit);
+    @Query("SELECT r.utilisateur FROM Reservation r " +
+           "WHERE r.actif = true AND r.statut = 'CONFIRMEE' " +
+           "GROUP BY r.utilisateur " +
+           "ORDER BY COUNT(r) DESC")
+    List<Utilisateur> findUtilisateursLesPlusActifs(Pageable pageable);
 
     /**
      * Trouve les réservations qui peuvent être remboursées

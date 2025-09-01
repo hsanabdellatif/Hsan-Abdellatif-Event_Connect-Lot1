@@ -27,7 +27,7 @@ import java.util.Arrays;
  * Gère la connexion, l'inscription et la validation des tokens JWT
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 

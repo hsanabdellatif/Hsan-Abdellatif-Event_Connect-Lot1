@@ -20,7 +20,7 @@ export interface ReservationDto {
   providedIn: 'root'
 })
 export class ReservationService {
-  private apiUrl = `${environment.apiUrl}/api/reservations`;
+  private apiUrl = `${environment.apiUrl}/reservations`;
 
   private httpOptions = {
     headers: new HttpHeaders({

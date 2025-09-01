@@ -57,21 +57,21 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Endpoints publics
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/auth/**", "/api/auth/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
                 // Documentation API (optionnel)
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // Endpoints pour les organisateurs
-                .requestMatchers("/api/evenements").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
-                .requestMatchers("/api/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
+                .requestMatchers("/evenements").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
+                .requestMatchers("/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
                 // Gestion des événements - création, modification, suppression
-                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/evenements").hasAnyRole("ADMIN", "ORGANISATEUR")
-                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR")
-                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/evenements").hasAnyRole("ADMIN", "ORGANISATEUR")
+                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR")
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/evenements/**").hasAnyRole("ADMIN", "ORGANISATEUR")
                 // Réservations
-                .requestMatchers("/api/reservations/**").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
+                .requestMatchers("/reservations/**").hasAnyRole("ADMIN", "ORGANISATEUR", "PARTICIPANT")
                 // Administration des utilisateurs
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 // Tous les autres endpoints nécessitent une authentification
                 .anyRequest().authenticated()
             )
@@ -87,10 +87,21 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of(
+            "Authorization",
+            "Cache-Control",
+            "Content-Type",
+            "Accept",
+            "X-Requested-With",
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Headers",
+            "Origin"
+        ));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

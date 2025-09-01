@@ -20,7 +20,7 @@ export interface UtilisateurDto {
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = `${environment.apiUrl}/api/utilisateurs`;
+  private apiUrl = `${environment.apiUrl}/utilisateurs`;
 
   private httpOptions = {
     headers: new HttpHeaders({

@@ -1,0 +1,108 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4>Inscription</h4>
+                </div>
+                <div class="card-body">
+                    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+                        <div class="alert alert-danger" *ngIf="error">
+                            {{ error }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nom">Nom</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="nom" 
+                                   formControlName="nom" 
+                                   placeholder="Entrez votre nom">
+                            <div class="text-danger" *ngIf="registerForm.get('nom')?.touched && registerForm.get('nom')?.invalid">
+                                <small *ngIf="registerForm.get('nom')?.errors?.['required']">Le nom est requis</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="prenom">Prénom</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="prenom" 
+                                   formControlName="prenom" 
+                                   placeholder="Entrez votre prénom">
+                            <div class="text-danger" *ngIf="registerForm.get('prenom')?.touched && registerForm.get('prenom')?.invalid">
+                                <small *ngIf="registerForm.get('prenom')?.errors?.['required']">Le prénom est requis</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="email">Email</label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   formControlName="email" 
+                                   placeholder="Entrez votre email">
+                            <div class="text-danger" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+                                <small *ngIf="registerForm.get('email')?.errors?.['required']">L'email est requis</small>
+                                <small *ngIf="registerForm.get('email')?.errors?.['email']">Email invalide</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="telephone">Téléphone</label>
+                            <input type="tel" 
+                                   class="form-control" 
+                                   id="telephone" 
+                                   formControlName="telephone" 
+                                   placeholder="Entrez votre numéro de téléphone">
+                            <div class="text-danger" *ngIf="registerForm.get('telephone')?.touched && registerForm.get('telephone')?.invalid">
+                                <small *ngIf="registerForm.get('telephone')?.errors?.['required']">Le téléphone est requis</small>
+                                <small *ngIf="registerForm.get('telephone')?.errors?.['pattern']">Le numéro doit contenir 8 chiffres</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="password">Mot de passe</label>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password" 
+                                   formControlName="password" 
+                                   placeholder="Entrez votre mot de passe">
+                            <div class="text-danger" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+                                <small *ngIf="registerForm.get('password')?.errors?.['required']">Le mot de passe est requis</small>
+                                <small *ngIf="registerForm.get('password')?.errors?.['minlength']">Le mot de passe doit contenir au moins 6 caractères</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="confirmPassword">Confirmez le mot de passe</label>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="confirmPassword" 
+                                   formControlName="confirmPassword" 
+                                   placeholder="Confirmez votre mot de passe">
+                            <div class="text-danger" *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.invalid">
+                                <small *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">La confirmation du mot de passe est requise</small>
+                                <small *ngIf="registerForm.get('confirmPassword')?.errors?.['mustMatch']">Les mots de passe ne correspondent pas</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" 
+                                    class="btn btn-primary w-100" 
+                                    [disabled]="registerForm.invalid">
+                                S'inscrire
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p>Déjà inscrit ? 
+                            <a href="javascript:void(0)" (click)="goToLogin()">Se connecter</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

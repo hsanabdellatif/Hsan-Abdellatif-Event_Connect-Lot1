@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import * as Chartist from 'chartist';
+import { EventService } from '../services/event.service';
+import { UserService } from '../services/user.service';
+import { ReservationService } from '../services/reservation.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -8,29 +11,15 @@ import * as Chartist from 'chartist';
 })
 export class DashboardComponent implements OnInit {
 
-  // Données de démonstration EventConnect
-  dashboardStats = {
-    totalEvents: 12,
-    totalReservations: 234,
-    totalUsers: 89,
-    revenue: 15750.00,
-    activeEvents: 8,
-    pendingReservations: 15
-  };
+  dashboardStats: any = {};
+  recentEvents: any[] = [];
+  recentReservations: any[] = [];
 
-  recentEvents = [
-    { nom: 'Conférence Tech 2025', date: '2025-09-15', reservations: 45 },
-    { nom: 'Workshop Angular', date: '2025-09-20', reservations: 28 },
-    { nom: 'Meetup DevOps', date: '2025-10-05', reservations: 34 }
-  ];
-
-  recentReservations = [
-    { utilisateur: 'Jean Dupont', evenement: 'Conférence Tech 2025', statut: 'CONFIRMEE' },
-    { utilisateur: 'Marie Martin', evenement: 'Workshop Angular', statut: 'EN_ATTENTE' },
-    { utilisateur: 'Pierre Durand', evenement: 'Meetup DevOps', statut: 'CONFIRMEE' }
-  ];
-
-  constructor() { }
+  constructor(
+    private eventService: EventService,
+    private userService: UserService,
+    private reservationService: ReservationService
+  ) { }
   startAnimationForLineChart(chart){
       let seq: any, delays: any, durations: any;
       seq = 0;
@@ -88,6 +77,58 @@ export class DashboardComponent implements OnInit {
       seq2 = 0;
   };
   ngOnInit() {
+    // Charger les statistiques
+    this.loadStats();
+    
+    // Charger les événements récents
+    this.loadRecentEvents();
+    
+    // Charger les réservations récentes
+    this.loadRecentReservations();
+
+    this.initCharts();
+  }
+
+  private loadStats() {
+    Promise.all([
+      this.eventService.getEventStats().toPromise(),
+      this.userService.getUserStats().toPromise(),
+      this.reservationService.getReservationStats().toPromise()
+    ]).then(([eventStats, userStats, reservationStats]) => {
+      this.dashboardStats = {
+        totalEvents: eventStats.totalEvents,
+        activeEvents: eventStats.activeEvents,
+        totalUsers: userStats.totalUsers,
+        totalReservations: reservationStats.totalReservations,
+        pendingReservations: reservationStats.pendingReservations,
+        revenue: reservationStats.totalRevenue
+      };
+    });
+  }
+
+  private loadRecentEvents() {
+    this.eventService.getActiveEvents().subscribe(events => {
+      this.recentEvents = events.slice(0, 3).map(event => ({
+        nom: event.nom,
+        date: event.dateDebut,
+        reservations: event.placesReservees || 0
+      }));
+    });
+  }
+
+  private loadRecentReservations() {
+    this.reservationService.getAllReservations().subscribe(reservations => {
+      this.recentReservations = reservations
+        .slice(0, 3)
+        .map(reservation => ({
+          utilisateur: `${reservation.utilisateurNom}`,
+          evenement: reservation.evenementNom,
+          statut: reservation.statut
+        }));
+    });
+  }
+
+  private initCharts() {
       /* ----------==========     Daily Sales Chart initialization For Documentation    ==========---------- */
 
       const dataDailySalesChart: any = {

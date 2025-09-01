@@ -2,6 +2,7 @@ package com.eventconnect.repositories;
 
 import com.eventconnect.entities.Evenement;
 import com.eventconnect.entities.Utilisateur;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -177,13 +178,12 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @param limit nombre maximum d'événements à retourner
      * @return Liste des événements les plus populaires
      */
-    @Query(value = "SELECT e.* FROM evenements e " +
-                   "LEFT JOIN reservations r ON e.id = r.evenement_id AND r.actif = true " +
-                   "WHERE e.actif = true " +
-                   "GROUP BY e.id " +
-                   "ORDER BY COUNT(r.id) DESC " +
-                   "LIMIT :limit", nativeQuery = true)
-    List<Evenement> findEvenementsLesplusPopulaires(@Param("limit") int limit);
+    @Query("SELECT e FROM Evenement e " +
+           "LEFT JOIN Reservation r ON e.id = r.evenement.id AND r.actif = true " +
+           "WHERE e.actif = true " +
+           "GROUP BY e " +
+           "ORDER BY COUNT(r) DESC")
+    List<Evenement> findEvenementsLesplusPopulaires(Pageable pageable);
 
     /**
      * Trouve les événements par titre (recherche partielle)

@@ -20,7 +20,7 @@ export interface EventDto {
   providedIn: 'root'
 })
 export class EventService {
-  private apiUrl = `${environment.apiUrl}/api/evenements`;
+  private apiUrl = `${environment.apiUrl}/evenements`;
 
   private httpOptions = {
     headers: new HttpHeaders({
