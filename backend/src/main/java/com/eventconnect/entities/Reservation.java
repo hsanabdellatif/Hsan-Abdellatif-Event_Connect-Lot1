@@ -3,19 +3,20 @@ package com.eventconnect.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
  * Entité représentant une réservation d'événement dans l'application EventConnect
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
 @Entity
-@Table(name = "reservations", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "evenement_id"}))
+@Table(name = "reservations",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "evenement_id"}))
 public class Reservation {
 
     @Id
@@ -57,12 +58,12 @@ public class Reservation {
     private Boolean actif = true;
 
     // Relations
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "utilisateur_id", nullable = false)
     @NotNull(message = "L'utilisateur est obligatoire")
     private Utilisateur utilisateur;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "evenement_id", nullable = false)
     @NotNull(message = "L'événement est obligatoire")
     private Evenement evenement;
@@ -70,12 +71,12 @@ public class Reservation {
     // Constructeurs
     public Reservation() {}
 
-    public Reservation(Long id, Integer nombrePlaces, BigDecimal montantTotal, 
-                      StatutReservation statut, LocalDateTime dateReservation, 
-                      LocalDateTime dateConfirmation, LocalDateTime dateAnnulation, 
-                      LocalDateTime dateModification, String codeReservation, 
-                      String commentaire, Boolean actif, Utilisateur utilisateur, 
-                      Evenement evenement) {
+    public Reservation(Long id, Integer nombrePlaces, BigDecimal montantTotal,
+                       StatutReservation statut, LocalDateTime dateReservation,
+                       LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
+                       LocalDateTime dateModification, String codeReservation,
+                       String commentaire, Boolean actif, Utilisateur utilisateur,
+                       Evenement evenement) {
         this.id = id;
         this.nombrePlaces = nombrePlaces;
         this.montantTotal = montantTotal;
@@ -208,7 +209,7 @@ public class Reservation {
         if (this.statut == StatutReservation.EN_ATTENTE || this.statut == StatutReservation.CONFIRMEE) {
             this.statut = StatutReservation.ANNULEE;
             this.dateAnnulation = LocalDateTime.now();
-            
+
             // Libérer les places dans l'événement
             if (this.evenement != null) {
                 this.evenement.augmenterPlacesDisponibles(this.nombrePlaces);
@@ -229,16 +230,16 @@ public class Reservation {
      * Méthode utilitaire pour vérifier si la réservation est active
      */
     public boolean isActive() {
-        return this.actif && 
-               (this.statut == StatutReservation.EN_ATTENTE || this.statut == StatutReservation.CONFIRMEE);
+        return this.actif &&
+                (this.statut == StatutReservation.EN_ATTENTE || this.statut == StatutReservation.CONFIRMEE);
     }
 
     /**
      * Méthode utilitaire pour vérifier si la réservation peut être remboursée
      */
     public boolean peutEtreRemboursee() {
-        return this.statut == StatutReservation.CONFIRMEE && 
-               this.evenement.getDateDebut().isAfter(LocalDateTime.now().plusHours(24));
+        return this.statut == StatutReservation.CONFIRMEE &&
+                this.evenement.getDateDebut().isAfter(LocalDateTime.now().plusHours(24));
     }
 
     /**
@@ -248,7 +249,7 @@ public class Reservation {
         if (peutEtreRemboursee()) {
             this.statut = StatutReservation.REMBOURSEE;
             this.dateModification = LocalDateTime.now();
-            
+
             // Libérer les places dans l'événement
             if (this.evenement != null) {
                 this.evenement.augmenterPlacesDisponibles(this.nombrePlaces);

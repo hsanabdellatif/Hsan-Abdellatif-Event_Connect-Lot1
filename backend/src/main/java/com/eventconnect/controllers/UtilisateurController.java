@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Contrôleur REST pour la gestion des utilisateurs
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -38,7 +40,7 @@ public class UtilisateurController {
     @PostMapping
     public ResponseEntity<Utilisateur> creerUtilisateur(@Valid @RequestBody Utilisateur utilisateur) {
         log.info("POST /utilisateurs - Création d'un utilisateur avec email: {}", utilisateur.getEmail());
-        
+
         try {
             Utilisateur nouvelUtilisateur = utilisateurService.creerUtilisateur(utilisateur);
             return ResponseEntity.status(HttpStatus.CREATED).body(nouvelUtilisateur);
@@ -59,7 +61,7 @@ public class UtilisateurController {
     @GetMapping("/{id}")
     public ResponseEntity<Utilisateur> obtenirUtilisateur(@PathVariable Long id) {
         log.info("GET /utilisateurs/{} - Récupération de l'utilisateur", id);
-        
+
         try {
             Utilisateur utilisateur = utilisateurService.obtenirUtilisateurParId(id);
             return ResponseEntity.ok().body(utilisateur);
@@ -76,7 +78,7 @@ public class UtilisateurController {
     @GetMapping
     public ResponseEntity<List<Utilisateur>> obtenirTousLesUtilisateurs() {
         log.info("GET /utilisateurs - Récupération de tous les utilisateurs");
-        
+
         try {
             List<Utilisateur> utilisateurs = utilisateurService.obtenirTousLesUtilisateursActifs();
             return ResponseEntity.ok(utilisateurs);
@@ -94,10 +96,10 @@ public class UtilisateurController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<Utilisateur> mettreAJourUtilisateur(
-            @PathVariable Long id, 
+            @PathVariable Long id,
             @Valid @RequestBody Utilisateur utilisateur) {
         log.info("PUT /utilisateurs/{} - Mise à jour de l'utilisateur", id);
-        
+
         try {
             Utilisateur utilisateurMisAJour = utilisateurService.mettreAJourUtilisateur(id, utilisateur);
             return ResponseEntity.ok(utilisateurMisAJour);
@@ -118,7 +120,7 @@ public class UtilisateurController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> supprimerUtilisateur(@PathVariable Long id) {
         log.info("DELETE /utilisateurs/{} - Suppression de l'utilisateur", id);
-        
+
         try {
             utilisateurService.supprimerUtilisateur(id);
             return ResponseEntity.noContent().build();
@@ -139,12 +141,12 @@ public class UtilisateurController {
     @GetMapping("/recherche")
     public ResponseEntity<Utilisateur> rechercherParEmail(@RequestParam String email) {
         log.info("GET /utilisateurs/recherche?email={} - Recherche par email", email);
-        
+
         try {
             Optional<Utilisateur> utilisateur = utilisateurService.obtenirUtilisateurParEmail(email);
             return utilisateur
-                .map(u -> ResponseEntity.ok().body(u))
-                .orElse(ResponseEntity.notFound().build());
+                    .map(u -> ResponseEntity.ok().body(u))
+                    .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
             log.error("Erreur lors de la recherche par email", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -158,7 +160,7 @@ public class UtilisateurController {
     @GetMapping("/count")
     public ResponseEntity<Long> compterUtilisateurs() {
         log.info("GET /utilisateurs/count - Comptage des utilisateurs");
-        
+
         try {
             long nombreUtilisateurs = utilisateurService.compterUtilisateursActifs();
             return ResponseEntity.ok(nombreUtilisateurs);
@@ -176,12 +178,79 @@ public class UtilisateurController {
     @GetMapping("/exists")
     public ResponseEntity<Boolean> verifierExistenceEmail(@RequestParam String email) {
         log.info("GET /utilisateurs/exists?email={} - Vérification d'existence", email);
-        
+
         try {
             boolean existe = utilisateurService.existsByEmail(email);
             return ResponseEntity.ok(existe);
         } catch (Exception e) {
             log.error("Erreur lors de la vérification d'existence", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Added to match frontend
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getUserStats() {
+        log.info("GET /utilisateurs/stats - Récupération des statistiques des utilisateurs");
+        try {
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("totalUsers", utilisateurService.compterUtilisateursActifs());
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération des statistiques des utilisateurs", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/actifs")
+    public ResponseEntity<List<Utilisateur>> getActiveUsers() {
+        log.info("GET /utilisateurs/actifs - Récupération des utilisateurs actifs");
+        try {
+            List<Utilisateur> activeUsers = utilisateurService.obtenirTousLesUtilisateursActifs();
+            return ResponseEntity.ok(activeUsers);
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération des utilisateurs actifs", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Utilisateur>> searchUsers(@RequestParam String q) {
+        log.info("GET /utilisateurs/search?q={} - Recherche des utilisateurs", q);
+        try {
+            List<Utilisateur> users = utilisateurService.rechercherUtilisateurs(q);
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            log.error("Erreur lors de la recherche des utilisateurs", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Utilisateur> getUserByEmail(@PathVariable String email) {
+        log.info("GET /utilisateurs/email/{} - Récupération de l'utilisateur par email", email);
+        try {
+            Optional<Utilisateur> user = utilisateurService.obtenirUtilisateurParEmail(email);
+            return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération de l'utilisateur par email", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PatchMapping("/{id}/toggle-status")
+    public ResponseEntity<Utilisateur> toggleUserStatus(@PathVariable Long id) {
+        log.info("PATCH /utilisateurs/{}/toggle-status - Toggle statut de l'utilisateur", id);
+        try {
+            Utilisateur user = utilisateurService.obtenirUtilisateurParId(id);
+            boolean newStatus = !user.getActif();
+            Utilisateur updatedUser = utilisateurService.changerStatutUtilisateur(id, newStatus);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            log.error("Erreur lors du toggle statut: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors du toggle statut", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -3,12 +3,12 @@ package com.eventconnect.repositories;
 import com.eventconnect.entities.Evenement;
 import com.eventconnect.entities.Reservation;
 import com.eventconnect.entities.Utilisateur;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  * Repository pour l'entité Reservation
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -100,7 +100,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des réservations confirmées
      */
     @Query("SELECT r FROM Reservation r WHERE r.utilisateur = :utilisateur " +
-           "AND r.statut = 'CONFIRMEE' AND r.actif = true")
+            "AND r.statut = 'CONFIRMEE' AND r.actif = true")
     List<Reservation> findReservationsConfirmeesUtilisateur(@Param("utilisateur") Utilisateur utilisateur);
 
     /**
@@ -116,7 +116,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des réservations expirées
      */
     @Query("SELECT r FROM Reservation r WHERE r.statut = 'EN_ATTENTE' " +
-           "AND r.dateReservation < :dateExpiration AND r.actif = true")
+            "AND r.dateReservation < :dateExpiration AND r.actif = true")
     List<Reservation> findReservationsExpirees(@Param("dateExpiration") LocalDateTime dateExpiration);
 
     /**
@@ -125,7 +125,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return nombre total de places réservées
      */
     @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
-           "WHERE r.evenement = :evenement AND r.statut IN ('EN_ATTENTE', 'CONFIRMEE') AND r.actif = true")
+            "WHERE r.evenement = :evenement AND r.statut IN ('EN_ATTENTE', 'CONFIRMEE') AND r.actif = true")
     Integer countPlacesReserveesEvenement(@Param("evenement") Evenement evenement);
 
     /**
@@ -134,7 +134,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return montant total des réservations confirmées
      */
     @Query("SELECT COALESCE(SUM(r.montantTotal), 0) FROM Reservation r " +
-           "WHERE r.evenement = :evenement AND r.statut = 'CONFIRMEE' AND r.actif = true")
+            "WHERE r.evenement = :evenement AND r.statut = 'CONFIRMEE' AND r.actif = true")
     BigDecimal calculateChiffredAffairesEvenement(@Param("evenement") Evenement evenement);
 
     /**
@@ -144,8 +144,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des réservations pour événements futurs
      */
     @Query("SELECT r FROM Reservation r WHERE r.utilisateur = :utilisateur " +
-           "AND r.evenement.dateDebut > :dateActuelle AND r.actif = true " +
-           "AND r.statut IN ('EN_ATTENTE', 'CONFIRMEE')")
+            "AND r.evenement.dateDebut > :dateActuelle AND r.actif = true " +
+            "AND r.statut IN ('EN_ATTENTE', 'CONFIRMEE')")
     List<Reservation> findReservationsEvenementsFuturs(@Param("utilisateur") Utilisateur utilisateur,
                                                        @Param("dateActuelle") LocalDateTime dateActuelle);
 
@@ -156,7 +156,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des réservations pour événements passés
      */
     @Query("SELECT r FROM Reservation r WHERE r.utilisateur = :utilisateur " +
-           "AND r.evenement.dateFin < :dateActuelle AND r.actif = true")
+            "AND r.evenement.dateFin < :dateActuelle AND r.actif = true")
     List<Reservation> findReservationsEvenementsPasses(@Param("utilisateur") Utilisateur utilisateur,
                                                        @Param("dateActuelle") LocalDateTime dateActuelle);
 
@@ -167,7 +167,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des réservations dans cette période
      */
     @Query("SELECT r FROM Reservation r WHERE r.dateReservation BETWEEN :dateDebut AND :dateFin " +
-           "AND r.actif = true")
+            "AND r.actif = true")
     List<Reservation> findReservationsDansPeriode(@Param("dateDebut") LocalDateTime dateDebut,
                                                   @Param("dateFin") LocalDateTime dateFin);
 
@@ -191,10 +191,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return chiffre d'affaires total
      */
     @Query("SELECT COALESCE(SUM(r.montantTotal), 0) FROM Reservation r " +
-           "WHERE r.dateConfirmation BETWEEN :dateDebut AND :dateFin " +
-           "AND r.statut = 'CONFIRMEE' AND r.actif = true")
+            "WHERE r.dateConfirmation BETWEEN :dateDebut AND :dateFin " +
+            "AND r.statut = 'CONFIRMEE' AND r.actif = true")
     BigDecimal calculateChiffredAffairesPeriode(@Param("dateDebut") LocalDateTime dateDebut,
-                                               @Param("dateFin") LocalDateTime dateFin);
+                                                @Param("dateFin") LocalDateTime dateFin);
 
     /**
      * Trouve les utilisateurs les plus actifs (avec le plus de réservations)
@@ -202,9 +202,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des utilisateurs les plus actifs
      */
     @Query("SELECT r.utilisateur FROM Reservation r " +
-           "WHERE r.actif = true AND r.statut = 'CONFIRMEE' " +
-           "GROUP BY r.utilisateur " +
-           "ORDER BY COUNT(r) DESC")
+            "WHERE r.actif = true AND r.statut = 'CONFIRMEE' " +
+            "GROUP BY r.utilisateur " +
+            "ORDER BY COUNT(r) DESC")
     List<Utilisateur> findUtilisateursLesPlusActifs(Pageable pageable);
 
     /**
@@ -213,7 +213,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des réservations remboursables
      */
     @Query("SELECT r FROM Reservation r WHERE r.statut = 'CONFIRMEE' " +
-           "AND r.evenement.dateDebut > :dateMinimum AND r.actif = true")
+            "AND r.evenement.dateDebut > :dateMinimum AND r.actif = true")
     List<Reservation> findReservationsRemboursables(@Param("dateMinimum") LocalDateTime dateMinimum);
 
     /**
@@ -222,7 +222,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return le chiffre d'affaires total
      */
     @Query("SELECT COALESCE(SUM(r.montantTotal), 0) FROM Reservation r " +
-           "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
+            "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
     BigDecimal calculateTotalRevenueForEvenement(@Param("evenementId") Long evenementId);
 
     /**
@@ -231,7 +231,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return le nombre de places réservées
      */
     @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
-           "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
+            "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
     Integer countPlacesReserveesForEvenement(@Param("evenementId") Long evenementId);
     /**
      * Trouve les réservations d'un utilisateur dans une période donnée
@@ -241,16 +241,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des réservations ordonnées par date d'événement
      */
     @Query("SELECT r FROM Reservation r JOIN r.evenement e " +
-           "WHERE r.utilisateur = :utilisateur AND r.actif = true " +
-           "AND e.actif = true " +
-           "AND ((e.dateDebut BETWEEN :dateDebut AND :dateFin) " +
-           "OR (e.dateFin BETWEEN :dateDebut AND :dateFin) " +
-           "OR (e.dateDebut <= :dateDebut AND e.dateFin >= :dateFin)) " +
-           "ORDER BY e.dateDebut")
+            "WHERE r.utilisateur = :utilisateur AND r.actif = true " +
+            "AND e.actif = true " +
+            "AND ((e.dateDebut BETWEEN :dateDebut AND :dateFin) " +
+            "OR (e.dateFin BETWEEN :dateDebut AND :dateFin) " +
+            "OR (e.dateDebut <= :dateDebut AND e.dateFin >= :dateFin)) " +
+            "ORDER BY e.dateDebut")
     List<Reservation> findReservationsUtilisateurPourPeriode(
-        @Param("utilisateur") Utilisateur utilisateur,
-        @Param("dateDebut") LocalDateTime dateDebut,
-        @Param("dateFin") LocalDateTime dateFin);
+            @Param("utilisateur") Utilisateur utilisateur,
+            @Param("dateDebut") LocalDateTime dateDebut,
+            @Param("dateFin") LocalDateTime dateFin);
 
     /**
      * Compte le nombre total de réservations confirmées d'un utilisateur
@@ -258,7 +258,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return le nombre de réservations confirmées
      */
     @Query("SELECT COUNT(r) FROM Reservation r " +
-           "WHERE r.utilisateur = :utilisateur AND r.statut = 'CONFIRMEE' AND r.actif = true")
+            "WHERE r.utilisateur = :utilisateur AND r.statut = 'CONFIRMEE' AND r.actif = true")
     Long countReservationsConfirmeesParUtilisateur(@Param("utilisateur") Utilisateur utilisateur);
 
     /**
@@ -268,10 +268,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return Liste des réservations récentes
      */
     @Query("SELECT r FROM Reservation r " +
-           "WHERE r.utilisateur = :utilisateur AND r.statut = 'CONFIRMEE' " +
-           "AND r.actif = true AND r.dateReservation >= :dateDebut " +
-           "ORDER BY r.dateReservation DESC")
+            "WHERE r.utilisateur = :utilisateur AND r.statut = 'CONFIRMEE' " +
+            "AND r.actif = true AND r.dateReservation >= :dateDebut " +
+            "ORDER BY r.dateReservation DESC")
     List<Reservation> findReservationsRecentesParUtilisateur(
-        @Param("utilisateur") Utilisateur utilisateur,
-        @Param("dateDebut") LocalDateTime dateDebut);
+            @Param("utilisateur") Utilisateur utilisateur,
+            @Param("dateDebut") LocalDateTime dateDebut);
 }

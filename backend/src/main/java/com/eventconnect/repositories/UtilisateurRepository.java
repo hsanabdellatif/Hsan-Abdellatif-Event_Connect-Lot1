@@ -11,7 +11,7 @@ import java.util.Optional;
 
 /**
  * Repository pour l'entité Utilisateur
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -59,10 +59,10 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
      * @return Liste des utilisateurs correspondants
      */
     @Query("SELECT u FROM Utilisateur u WHERE " +
-           "LOWER(u.nom) LIKE LOWER(CONCAT('%', :nom, '%')) OR " +
-           "LOWER(u.prenom) LIKE LOWER(CONCAT('%', :prenom, '%'))")
+            "LOWER(u.nom) LIKE LOWER(CONCAT('%', :nom, '%')) OR " +
+            "LOWER(u.prenom) LIKE LOWER(CONCAT('%', :prenom, '%'))")
     List<Utilisateur> findByNomContainingIgnoreCaseOrPrenomContainingIgnoreCase(
-            @Param("nom") String nom, 
+            @Param("nom") String nom,
             @Param("prenom") String prenom);
 
     /**
@@ -70,7 +70,7 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
      * @return Liste des organisateurs actifs
      */
     @Query("SELECT u FROM Utilisateur u WHERE " +
-           "(u.role = 'ORGANISATEUR' OR u.role = 'ADMIN') AND u.actif = true")
+            "(u.role = 'ORGANISATEUR' OR u.role = 'ADMIN') AND u.actif = true")
     List<Utilisateur> findAllOrganisateursActifs();
 
     /**
@@ -84,8 +84,8 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
      * @return Liste des utilisateurs organisateurs
      */
     @Query("SELECT DISTINCT u FROM Utilisateur u " +
-           "INNER JOIN u.evenementsOrganises e " +
-           "WHERE u.actif = true")
+            "INNER JOIN u.evenementsOrganises e " +
+            "WHERE u.actif = true")
     List<Utilisateur> findUtilisateursAvecEvenements();
 
     /**
@@ -93,8 +93,8 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
      * @return Liste des utilisateurs avec réservations
      */
     @Query("SELECT DISTINCT u FROM Utilisateur u " +
-           "INNER JOIN u.reservations r " +
-           "WHERE u.actif = true AND r.actif = true")
+            "INNER JOIN u.reservations r " +
+            "WHERE u.actif = true AND r.actif = true")
     List<Utilisateur> findUtilisateursAvecReservations();
 
     /**
@@ -103,8 +103,8 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
      * @return Liste des utilisateurs correspondants
      */
     @Query("SELECT u FROM Utilisateur u WHERE u.actif = true AND " +
-           "(LOWER(u.nom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(u.prenom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+            "(LOWER(u.nom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "LOWER(u.prenom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     List<Utilisateur> rechercherUtilisateurs(@Param("searchTerm") String searchTerm);
 }

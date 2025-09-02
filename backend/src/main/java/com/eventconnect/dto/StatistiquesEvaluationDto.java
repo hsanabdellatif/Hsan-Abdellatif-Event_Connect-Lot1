@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 /**
  * DTO pour les statistiques d'évaluation d'un événement
  * Contient toutes les métriques de satisfaction et feedback
- * 
+ *
  * @author EventConnect Team
  * @since 2.0.0
  */
@@ -30,7 +30,7 @@ public class StatistiquesEvaluationDto {
 
     /**
      * Constructeur avec paramètres principaux
-     * 
+     *
      * @param totalEvaluations nombre total d'évaluations
      * @param noteMoyenne note moyenne
      * @param recommandations nombre de recommandations
@@ -39,8 +39,8 @@ public class StatistiquesEvaluationDto {
         this.totalEvaluations = totalEvaluations;
         this.noteMoyenne = noteMoyenne;
         this.recommandations = recommandations;
-        this.pourcentageRecommandation = totalEvaluations > 0 ? 
-            (recommandations * 100.0 / totalEvaluations) : 0.0;
+        this.pourcentageRecommandation = totalEvaluations > 0 ?
+                (recommandations * 100.0 / totalEvaluations) : 0.0;
     }
 
     // Getters et Setters
@@ -132,7 +132,7 @@ public class StatistiquesEvaluationDto {
     /**
      * Calcule le score de satisfaction (0-100)
      * Basé sur la répartition des notes
-     * 
+     *
      * @return score de satisfaction
      */
     public Double getScoreSatisfaction() {
@@ -141,11 +141,11 @@ public class StatistiquesEvaluationDto {
         }
 
         long total = totalEvaluations;
-        long positives = (cinqEtoiles != null ? cinqEtoiles : 0) + 
-                        (quatreEtoiles != null ? quatreEtoiles : 0);
+        long positives = (cinqEtoiles != null ? cinqEtoiles : 0) +
+                (quatreEtoiles != null ? quatreEtoiles : 0);
         long neutres = troisEtoiles != null ? troisEtoiles : 0;
-        long negatives = (deuxEtoiles != null ? deuxEtoiles : 0) + 
-                        (uneEtoile != null ? uneEtoile : 0);
+        long negatives = (deuxEtoiles != null ? deuxEtoiles : 0) +
+                (uneEtoile != null ? uneEtoile : 0);
 
         // Score pondéré : positives=100%, neutres=50%, négatives=0%
         double score = ((positives * 100.0) + (neutres * 50.0)) / total;
@@ -154,7 +154,7 @@ public class StatistiquesEvaluationDto {
 
     /**
      * Détermine le niveau de satisfaction basé sur le score
-     * 
+     *
      * @return niveau de satisfaction
      */
     public String getNiveauSatisfaction() {
@@ -168,7 +168,7 @@ public class StatistiquesEvaluationDto {
 
     /**
      * Vérifie si les statistiques indiquent une bonne satisfaction
-     * 
+     *
      * @return true si satisfaction bonne (score >= 60%)
      */
     public boolean isGoodSatisfaction() {
@@ -177,8 +177,8 @@ public class StatistiquesEvaluationDto {
 
     @Override
     public String toString() {
-        return String.format("StatistiquesEvaluation{total=%d, moyenne=%.2f, recommandations=%d (%.1f%%), satisfaction=%s}", 
-                           totalEvaluations, noteMoyenne, recommandations, 
-                           pourcentageRecommandation, getNiveauSatisfaction());
+        return String.format("StatistiquesEvaluation{total=%d, moyenne=%.2f, recommandations=%d (%.1f%%), satisfaction=%s}",
+                totalEvaluations, noteMoyenne, recommandations,
+                pourcentageRecommandation, getNiveauSatisfaction());
     }
 }

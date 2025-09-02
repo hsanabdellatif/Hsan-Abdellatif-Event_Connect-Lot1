@@ -12,10 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service pour la gestion des événements
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -38,19 +39,19 @@ public class EvenementService {
      */
     public Evenement creerEvenement(Evenement evenement) {
         log.info("Création d'un nouvel événement: {}", evenement.getTitre());
-        
+
         // Validation des dates
         if (evenement.getDateFin().isBefore(evenement.getDateDebut())) {
             throw new IllegalArgumentException("La date de fin ne peut pas être antérieure à la date de début");
         }
-        
+
         if (evenement.getDateDebut().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("La date de début ne peut pas être dans le passé");
         }
-        
+
         Evenement nouvelEvenement = evenementRepository.save(evenement);
         log.info("Événement créé avec succès, ID: {}", nouvelEvenement.getId());
-        
+
         return nouvelEvenement;
     }
 
@@ -63,10 +64,10 @@ public class EvenementService {
      */
     public Evenement mettreAJourEvenement(Long id, Evenement evenementMiseAJour) {
         log.info("Mise à jour de l'événement ID: {}", id);
-        
+
         Evenement evenementExistant = evenementRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + id));
-        
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + id));
+
         // Mise à jour des champs
         evenementExistant.setTitre(evenementMiseAJour.getTitre());
         evenementExistant.setDescription(evenementMiseAJour.getDescription());
@@ -76,15 +77,15 @@ public class EvenementService {
         evenementExistant.setPlacesMax(evenementMiseAJour.getPlacesMax());
         evenementExistant.setPrix(evenementMiseAJour.getPrix());
         evenementExistant.setCategorie(evenementMiseAJour.getCategorie());
-        
+
         // Validation des dates
         if (evenementExistant.getDateFin().isBefore(evenementExistant.getDateDebut())) {
             throw new IllegalArgumentException("La date de fin ne peut pas être antérieure à la date de début");
         }
-        
+
         Evenement evenementMisAJour = evenementRepository.save(evenementExistant);
         log.info("Événement mis à jour avec succès, ID: {}", evenementMisAJour.getId());
-        
+
         return evenementMisAJour;
     }
 
@@ -165,11 +166,11 @@ public class EvenementService {
      */
     public void supprimerEvenement(Long id) {
         log.info("Suppression de l'événement ID: {}", id);
-        
+
         if (!evenementRepository.existsById(id)) {
             throw new RuntimeException("Événement non trouvé avec l'ID: " + id);
         }
-        
+
         evenementRepository.deleteById(id);
         log.info("Événement supprimé avec succès, ID: {}", id);
     }
@@ -183,10 +184,10 @@ public class EvenementService {
     @Transactional(readOnly = true)
     public boolean verifierDisponibilite(Long id, Integer nombrePlaces) {
         log.info("Vérification de disponibilité pour l'événement ID: {}, places demandées: {}", id, nombrePlaces);
-        
+
         Evenement evenement = evenementRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + id));
-        
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + id));
+
         Integer placesReservees = evenementRepository.countPlacesReserveesParEvenement(id);
         Integer placesDisponibles = evenement.getPlacesMax() - placesReservees;
 
@@ -200,5 +201,19 @@ public class EvenementService {
     @Transactional(readOnly = true)
     public long compterEvenements() {
         return evenementRepository.count();
+    }
+
+    /**
+     * Récupère tous les événements actifs
+     * @return liste des événements actifs
+     */
+    @Transactional(readOnly = true)
+    public List<Evenement> getEvenementsActifs() {
+        log.info("Récupération des événements actifs");
+        return evenementRepository.findAll().stream()
+                .filter(e -> e.getActif() &&
+                        e.getStatut() == Evenement.StatutEvenement.PLANIFIE &&
+                        e.getDateDebut().isAfter(LocalDateTime.now()))
+                .collect(Collectors.toList());
     }
 }

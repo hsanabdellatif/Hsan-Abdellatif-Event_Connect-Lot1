@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 /**
  * Mapper pour convertir entre Utilisateur et UtilisateurDTO
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -27,14 +27,14 @@ public class UtilisateurMapper {
         }
 
         return new UtilisateurDTO(
-            utilisateur.getId(),
-            utilisateur.getNom(),
-            utilisateur.getPrenom(),
-            utilisateur.getEmail(),
-            utilisateur.getTelephone(),
-            utilisateur.getDateCreation(),
-            utilisateur.getDateModification(),
-            utilisateur.getActif()
+                utilisateur.getId(),
+                utilisateur.getNom(),
+                utilisateur.getPrenom(),
+                utilisateur.getEmail(),
+                utilisateur.getTelephone(),
+                utilisateur.getDateCreation(),
+                utilisateur.getDateModification(),
+                utilisateur.getActif()
         );
     }
 
@@ -76,12 +76,12 @@ public class UtilisateurMapper {
         utilisateur.setPrenom(dto.getPrenom());
         utilisateur.setEmail(dto.getEmail());
         utilisateur.setTelephone(dto.getTelephone());
-        
+
         // Le mot de passe n'est mis à jour que s'il est fourni
         if (dto.getMotDePasse() != null && !dto.getMotDePasse().trim().isEmpty()) {
             utilisateur.setMotDePasse(dto.getMotDePasse());
         }
-        
+
         if (dto.getActif() != null) {
             utilisateur.setActif(dto.getActif());
         }
@@ -98,8 +98,8 @@ public class UtilisateurMapper {
         }
 
         return utilisateurs.stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -113,8 +113,8 @@ public class UtilisateurMapper {
         }
 
         return dtos.stream()
-            .map(this::toEntity)
-            .collect(Collectors.toList());
+                .map(this::toEntity)
+                .collect(Collectors.toList());
     }
 
     /**

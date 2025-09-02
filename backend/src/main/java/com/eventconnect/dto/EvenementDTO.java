@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 /**
  * DTO pour l'entité Evenement
  * Utilisé pour les transferts de données dans les APIs
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -72,9 +72,9 @@ public class EvenementDTO {
     public EvenementDTO() {}
 
     public EvenementDTO(Long id, String titre, String description, LocalDateTime dateDebut, LocalDateTime dateFin,
-                       String lieu, Integer capaciteMax, BigDecimal prixPlace, String categorie, String imageUrl,
-                       LocalDateTime dateCreation, LocalDateTime dateModification, Boolean actif,
-                       Integer placesReservees, Integer placesDisponibles, BigDecimal chiffreAffaires) {
+                        String lieu, Integer capaciteMax, BigDecimal prixPlace, String categorie, String imageUrl,
+                        LocalDateTime dateCreation, LocalDateTime dateModification, Boolean actif,
+                        Integer placesReservees, Integer placesDisponibles, BigDecimal chiffreAffaires) {
         this.id = id;
         this.titre = titre;
         this.description = description;
@@ -97,7 +97,7 @@ public class EvenementDTO {
      * Constructeur pour la création (sans ID et sans champs calculés)
      */
     public EvenementDTO(String titre, String description, LocalDateTime dateDebut, LocalDateTime dateFin,
-                       String lieu, Integer capaciteMax, BigDecimal prixPlace, String categorie, String imageUrl) {
+                        String lieu, Integer capaciteMax, BigDecimal prixPlace, String categorie, String imageUrl) {
         this.titre = titre;
         this.description = description;
         this.dateDebut = dateDebut;

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 
 /**
  * Entité représentant un rôle utilisateur dans l'application EventConnect
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */

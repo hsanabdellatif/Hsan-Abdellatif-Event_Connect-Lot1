@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Repository pour l'entité Evenement
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -125,7 +125,7 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @return Liste des événements dans cette fourchette de prix
      */
     @Query("SELECT e FROM Evenement e WHERE e.prix BETWEEN :prixMin AND :prixMax AND e.actif = true")
-    List<Evenement> findEvenementsByPrixBetween(@Param("prixMin") BigDecimal prixMin, 
+    List<Evenement> findEvenementsByPrixBetween(@Param("prixMin") BigDecimal prixMin,
                                                 @Param("prixMax") BigDecimal prixMax);
 
     /**
@@ -142,9 +142,9 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @return Liste des événements correspondants
      */
     @Query("SELECT e FROM Evenement e WHERE e.actif = true AND " +
-           "(LOWER(e.titre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(e.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(e.lieu) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+            "(LOWER(e.titre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "LOWER(e.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "LOWER(e.lieu) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     List<Evenement> rechercherEvenements(@Param("searchTerm") String searchTerm);
 
     /**
@@ -154,10 +154,10 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @return Liste des événements dans cette période
      */
     @Query("SELECT e FROM Evenement e WHERE " +
-           "(e.dateDebut BETWEEN :dateDebut AND :dateFin OR " +
-           "e.dateFin BETWEEN :dateDebut AND :dateFin OR " +
-           "(e.dateDebut <= :dateDebut AND e.dateFin >= :dateFin)) AND e.actif = true")
-    List<Evenement> findEvenementsDansPeriode(@Param("dateDebut") LocalDateTime dateDebut, 
+            "(e.dateDebut BETWEEN :dateDebut AND :dateFin OR " +
+            "e.dateFin BETWEEN :dateDebut AND :dateFin OR " +
+            "(e.dateDebut <= :dateDebut AND e.dateFin >= :dateFin)) AND e.actif = true")
+    List<Evenement> findEvenementsDansPeriode(@Param("dateDebut") LocalDateTime dateDebut,
                                               @Param("dateFin") LocalDateTime dateFin);
 
     /**
@@ -179,10 +179,10 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @return Liste des événements les plus populaires
      */
     @Query("SELECT e FROM Evenement e " +
-           "LEFT JOIN Reservation r ON e.id = r.evenement.id AND r.actif = true " +
-           "WHERE e.actif = true " +
-           "GROUP BY e " +
-           "ORDER BY COUNT(r) DESC")
+            "LEFT JOIN Reservation r ON e.id = r.evenement.id AND r.actif = true " +
+            "WHERE e.actif = true " +
+            "GROUP BY e " +
+            "ORDER BY COUNT(r) DESC")
     List<Evenement> findEvenementsLesplusPopulaires(Pageable pageable);
 
     /**
@@ -207,7 +207,7 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @return Liste des événements ordonnés par date de début
      */
     List<Evenement> findByOrganisateurAndDateDebutBetweenOrderByDateDebut(
-        Utilisateur organisateur, LocalDateTime dateDebut, LocalDateTime dateFin);
+            Utilisateur organisateur, LocalDateTime dateDebut, LocalDateTime dateFin);
 
     /**
      * Trouve les événements en conflit avec une période donnée pour un organisateur
@@ -217,15 +217,15 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @return Liste des événements en conflit
      */
     @Query("SELECT e FROM Evenement e WHERE e.organisateur = :organisateur " +
-           "AND e.actif = true " +
-           "AND ((e.dateDebut BETWEEN :dateDebut AND :dateFin) " +
-           "OR (e.dateFin BETWEEN :dateDebut AND :dateFin) " +
-           "OR (e.dateDebut <= :dateDebut AND e.dateFin >= :dateFin)) " +
-           "ORDER BY e.dateDebut")
+            "AND e.actif = true " +
+            "AND ((e.dateDebut BETWEEN :dateDebut AND :dateFin) " +
+            "OR (e.dateFin BETWEEN :dateDebut AND :dateFin) " +
+            "OR (e.dateDebut <= :dateDebut AND e.dateFin >= :dateFin)) " +
+            "ORDER BY e.dateDebut")
     List<Evenement> findEvenementsConflitPourOrganisateur(
-        @Param("organisateur") Utilisateur organisateur,
-        @Param("dateDebut") LocalDateTime dateDebut,
-        @Param("dateFin") LocalDateTime dateFin);
+            @Param("organisateur") Utilisateur organisateur,
+            @Param("dateDebut") LocalDateTime dateDebut,
+            @Param("dateFin") LocalDateTime dateFin);
 
     /**
      * Compte les places réservées pour un événement
@@ -233,6 +233,6 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @return le nombre de places réservées
      */
     @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
-           "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
+            "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
     Integer countPlacesReserveesParEvenement(@Param("evenementId") Long evenementId);
 }

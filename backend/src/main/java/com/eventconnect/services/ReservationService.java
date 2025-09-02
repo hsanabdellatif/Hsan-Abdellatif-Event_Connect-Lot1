@@ -6,6 +6,7 @@ import com.eventconnect.entities.Utilisateur;
 import com.eventconnect.repositories.EvenementRepository;
 import com.eventconnect.repositories.ReservationRepository;
 import com.eventconnect.repositories.UtilisateurRepository;
+import com.eventconnect.dto.ReservationStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ import java.util.Optional;
 
 /**
  * Service pour la gestion des réservations
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -34,9 +35,9 @@ public class ReservationService {
     private final EvenementService evenementService;
 
     public ReservationService(ReservationRepository reservationRepository,
-                             UtilisateurRepository utilisateurRepository,
-                             EvenementRepository evenementRepository,
-                             EvenementService evenementService) {
+                              UtilisateurRepository utilisateurRepository,
+                              EvenementRepository evenementRepository,
+                              EvenementService evenementService) {
         this.reservationRepository = reservationRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.evenementRepository = evenementRepository;
@@ -52,37 +53,37 @@ public class ReservationService {
      * @throws RuntimeException si la réservation ne peut pas être créée
      */
     public Reservation creerReservation(Long utilisateurId, Long evenementId, Integer nombrePlaces) {
-        log.info("Création d'une réservation - Utilisateur: {}, Événement: {}, Places: {}", 
+        log.info("Création d'une réservation - Utilisateur: {}, Événement: {}, Places: {}",
                 utilisateurId, evenementId, nombrePlaces);
-        
+
         // Vérification de l'existence de l'utilisateur
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
-        
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
+
         // Vérification de l'existence de l'événement
         Evenement evenement = evenementRepository.findById(evenementId)
-            .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + evenementId));
-        
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + evenementId));
+
         // Vérification que l'événement est dans le futur
         if (evenement.getDateDebut().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Impossible de réserver un événement passé");
         }
-        
+
         // Vérification qu'il n'existe pas déjà une réservation pour cet utilisateur et cet événement
         Optional<Reservation> reservationExistante = reservationRepository
-            .findByUtilisateurAndEvenement(utilisateur, evenement);
+                .findByUtilisateurAndEvenement(utilisateur, evenement);
         if (reservationExistante.isPresent()) {
             throw new RuntimeException("Une réservation existe déjà pour cet utilisateur et cet événement");
         }
-        
+
         // Vérification de la disponibilité
         if (!evenementService.verifierDisponibilite(evenementId, nombrePlaces)) {
             throw new RuntimeException("Pas assez de places disponibles pour cet événement");
         }
-        
+
         // Calcul du montant total
         BigDecimal montantTotal = evenement.getPrix().multiply(new BigDecimal(nombrePlaces));
-        
+
         // Création de la réservation
         Reservation reservation = new Reservation();
         reservation.setUtilisateur(utilisateur);
@@ -91,10 +92,10 @@ public class ReservationService {
         reservation.setMontantTotal(montantTotal);
         reservation.setStatut(Reservation.StatutReservation.EN_ATTENTE);
         reservation.setDateReservation(LocalDateTime.now());
-        
+
         Reservation nouvelleReservation = reservationRepository.save(reservation);
         log.info("Réservation créée avec succès, ID: {}", nouvelleReservation.getId());
-        
+
         return nouvelleReservation;
     }
 
@@ -106,25 +107,25 @@ public class ReservationService {
      */
     public Reservation confirmerReservation(Long reservationId) {
         log.info("Confirmation de la réservation ID: {}", reservationId);
-        
+
         Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'ID: " + reservationId));
-        
+                .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'ID: " + reservationId));
+
         if (reservation.getStatut() != Reservation.StatutReservation.EN_ATTENTE) {
             throw new RuntimeException("Seules les réservations en attente peuvent être confirmées");
         }
-        
+
         // Vérification que l'événement est toujours dans le futur
         if (reservation.getEvenement().getDateDebut().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Impossible de confirmer une réservation pour un événement passé");
         }
-        
+
         reservation.setStatut(Reservation.StatutReservation.CONFIRMEE);
         reservation.setDateConfirmation(LocalDateTime.now());
-        
+
         Reservation reservationConfirmee = reservationRepository.save(reservation);
         log.info("Réservation confirmée avec succès, ID: {}", reservationConfirmee.getId());
-        
+
         return reservationConfirmee;
     }
 
@@ -136,20 +137,20 @@ public class ReservationService {
      */
     public Reservation annulerReservation(Long reservationId) {
         log.info("Annulation de la réservation ID: {}", reservationId);
-        
+
         Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'ID: " + reservationId));
-        
+                .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'ID: " + reservationId));
+
         if (reservation.getStatut() == Reservation.StatutReservation.ANNULEE) {
             throw new RuntimeException("Cette réservation est déjà annulée");
         }
-        
+
         reservation.setStatut(Reservation.StatutReservation.ANNULEE);
         reservation.setDateAnnulation(LocalDateTime.now());
-        
+
         Reservation reservationAnnulee = reservationRepository.save(reservation);
         log.info("Réservation annulée avec succès, ID: {}", reservationAnnulee.getId());
-        
+
         return reservationAnnulee;
     }
 
@@ -172,10 +173,10 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<Reservation> obtenirReservationsUtilisateur(Long utilisateurId) {
         log.info("Récupération des réservations de l'utilisateur ID: {}", utilisateurId);
-        
+
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
-        
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
+
         return reservationRepository.findByUtilisateur(utilisateur);
     }
 
@@ -187,10 +188,10 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<Reservation> obtenirReservationsEvenement(Long evenementId) {
         log.info("Récupération des réservations de l'événement ID: {}", evenementId);
-        
+
         Evenement evenement = evenementRepository.findById(evenementId)
-            .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + evenementId));
-        
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + evenementId));
+
         return reservationRepository.findByEvenement(evenement);
     }
 
@@ -212,11 +213,11 @@ public class ReservationService {
      */
     public void supprimerReservation(Long id) {
         log.info("Suppression de la réservation ID: {}", id);
-        
+
         if (!reservationRepository.existsById(id)) {
             throw new RuntimeException("Réservation non trouvée avec l'ID: " + id);
         }
-        
+
         reservationRepository.deleteById(id);
         log.info("Réservation supprimée avec succès, ID: {}", id);
     }
@@ -229,7 +230,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public BigDecimal calculerChiffreAffairesEvenement(Long evenementId) {
         log.info("Calcul du chiffre d'affaires pour l'événement ID: {}", evenementId);
-        
+
         BigDecimal chiffreAffaires = reservationRepository.calculateTotalRevenueForEvenement(evenementId);
         return chiffreAffaires != null ? chiffreAffaires : BigDecimal.ZERO;
     }
@@ -244,6 +245,27 @@ public class ReservationService {
     }
 
     /**
+     * Calcule les statistiques des réservations
+     * @return les statistiques des réservations
+     */
+    @Transactional(readOnly = true)
+    public ReservationStats calculerStatistiques() {
+        log.info("Calcul des statistiques des réservations");
+
+        ReservationStats stats = new ReservationStats();
+
+        // Calcul des totaux par statut
+        stats.setTotalReservations(reservationRepository.countByActifTrue());
+        stats.setPendingReservations(reservationRepository.countByStatutAndActifTrue(Reservation.StatutReservation.EN_ATTENTE));
+        stats.setTotalRevenue(reservationRepository.calculateChiffredAffairesPeriode(
+                LocalDateTime.of(2000, 1, 1, 0, 0), // Date de début suffisamment ancienne
+                LocalDateTime.now()
+        ).longValue());
+
+        return stats;
+    }
+
+    /**
      * Compte le nombre de places réservées pour un événement
      * @param evenementId l'ID de l'événement
      * @return le nombre de places réservées
@@ -251,7 +273,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public Integer compterPlacesReservees(Long evenementId) {
         log.info("Comptage des places réservées pour l'événement ID: {}", evenementId);
-        
+
         Integer placesReservees = reservationRepository.countPlacesReserveesForEvenement(evenementId);
         return placesReservees != null ? placesReservees : 0;
     }

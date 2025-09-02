@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * Entité représentant un utilisateur de l'application EventConnect
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -81,6 +81,7 @@ public class Utilisateur {
     private List<Evenement> evenementsOrganises = new ArrayList<>();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("user-reservations")
     private List<Reservation> reservations = new ArrayList<>();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -88,9 +89,9 @@ public class Utilisateur {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "utilisateur_roles",
-        joinColumns = @JoinColumn(name = "utilisateur_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
+            name = "utilisateur_roles",
+            joinColumns = @JoinColumn(name = "utilisateur_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private List<Role> roles = new ArrayList<>();
 
@@ -113,6 +114,26 @@ public class Utilisateur {
         private final String libelle;
 
         RoleUtilisateur(String libelle) {
+            this.libelle = libelle;
+        }
+
+        public String getLibelle() {
+            return libelle;
+        }
+    }
+
+    /**
+     * Enum pour les niveaux de fidélité
+     */
+    public enum NiveauFidelite {
+        BRONZE("Bronze"),
+        ARGENT("Argent"),
+        OR("Or"),
+        DIAMANT("Diamant");
+
+        private final String libelle;
+
+        NiveauFidelite(String libelle) {
             this.libelle = libelle;
         }
 
@@ -323,29 +344,5 @@ public class Utilisateur {
         } else {
             this.niveauFidelite = NiveauFidelite.BRONZE;
         }
-    }
-
-    /**
-     * Enum pour les niveaux de fidélité
-     */
-    public enum NiveauFidelite {
-        BRONZE("Bronze", 0, "#CD7F32"),
-        ARGENT("Argent", 100, "#C0C0C0"),
-        OR("Or", 500, "#FFD700"),
-        DIAMANT("Diamant", 1000, "#B9F2FF");
-
-        private final String libelle;
-        private final int pointsRequis;
-        private final String couleur;
-
-        NiveauFidelite(String libelle, int pointsRequis, String couleur) {
-            this.libelle = libelle;
-            this.pointsRequis = pointsRequis;
-            this.couleur = couleur;
-        }
-
-        public String getLibelle() { return libelle; }
-        public int getPointsRequis() { return pointsRequis; }
-        public String getCouleur() { return couleur; }
     }
 }

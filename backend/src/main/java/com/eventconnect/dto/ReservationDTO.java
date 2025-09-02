@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 /**
  * DTO pour l'entité Reservation
  * Utilisé pour les transferts de données dans les APIs
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -59,10 +59,10 @@ public class ReservationDTO {
     public ReservationDTO() {}
 
     public ReservationDTO(Long id, Integer nombrePlaces, BigDecimal montantTotal, StatutReservation statut,
-                         LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
-                         String commentaires, UtilisateurDTO utilisateur, EvenementDTO evenement,
-                         Long utilisateurId, String utilisateurNom, String utilisateurEmail,
-                         Long evenementId, String evenementTitre, LocalDateTime evenementDate) {
+                          LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
+                          String commentaires, UtilisateurDTO utilisateur, EvenementDTO evenement,
+                          Long utilisateurId, String utilisateurNom, String utilisateurEmail,
+                          Long evenementId, String evenementTitre, LocalDateTime evenementDate) {
         this.id = id;
         this.nombrePlaces = nombrePlaces;
         this.montantTotal = montantTotal;
@@ -143,9 +143,9 @@ public class ReservationDTO {
      * Constructeur complet pour la lecture
      */
     public ReservationDTO(Long id, Integer nombrePlaces, BigDecimal montantTotal, StatutReservation statut,
-                         LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
-                         String commentaires, Long utilisateurId, String utilisateurNom, String utilisateurEmail,
-                         Long evenementId, String evenementTitre, LocalDateTime evenementDate) {
+                          LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
+                          String commentaires, Long utilisateurId, String utilisateurNom, String utilisateurEmail,
+                          Long evenementId, String evenementTitre, LocalDateTime evenementDate) {
         this.id = id;
         this.nombrePlaces = nombrePlaces;
         this.montantTotal = montantTotal;
@@ -166,8 +166,8 @@ public class ReservationDTO {
      * Constructeur avec DTOs complets
      */
     public ReservationDTO(Long id, Integer nombrePlaces, BigDecimal montantTotal, StatutReservation statut,
-                         LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
-                         String commentaires, UtilisateurDTO utilisateur, EvenementDTO evenement) {
+                          LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
+                          String commentaires, UtilisateurDTO utilisateur, EvenementDTO evenement) {
         this.id = id;
         this.nombrePlaces = nombrePlaces;
         this.montantTotal = montantTotal;
@@ -212,7 +212,7 @@ public class ReservationDTO {
      * @return résumé
      */
     public String getResume() {
-        return String.format("Réservation #%d - %s places pour %s (%s)", 
+        return String.format("Réservation #%d - %s places pour %s (%s)",
                 id, nombrePlaces, evenementTitre, statut);
     }
 

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * DTO pour représenter un créneau libre dans l'agenda
  * Utilisé pour proposer des alternatives de planification
- * 
+ *
  * @author EventConnect Team
  * @since 2.0.0
  */
@@ -27,7 +27,7 @@ public class CreneauLibreDto {
 
     /**
      * Constructeur avec paramètres principaux
-     * 
+     *
      * @param dateDebut date de début du créneau libre
      * @param dateFin date de fin du créneau libre
      */
@@ -41,14 +41,14 @@ public class CreneauLibreDto {
 
     /**
      * Constructeur complet
-     * 
+     *
      * @param dateDebut date de début du créneau libre
      * @param dateFin date de fin du créneau libre
      * @param scoreProximite score de proximité avec la demande originale
      * @param description description du créneau
      */
-    public CreneauLibreDto(LocalDateTime dateDebut, LocalDateTime dateFin, 
-                          int scoreProximite, String description) {
+    public CreneauLibreDto(LocalDateTime dateDebut, LocalDateTime dateFin,
+                           int scoreProximite, String description) {
         this(dateDebut, dateFin);
         this.scoreProximite = scoreProximite;
         this.description = description;
@@ -57,7 +57,7 @@ public class CreneauLibreDto {
 
     /**
      * Détermine la tranche horaire basée sur l'heure de début
-     * 
+     *
      * @param dateTime date et heure
      * @return tranche horaire
      */
@@ -153,12 +153,12 @@ public class CreneauLibreDto {
 
     /**
      * Calcule un score de qualité du créneau basé sur plusieurs critères
-     * 
+     *
      * @return score de qualité (0-100)
      */
     public int getScoreQualite() {
         int score = 0;
-        
+
         // Bonus pour les créneaux en semaine
         if (dateDebut != null) {
             switch (dateDebut.getDayOfWeek()) {
@@ -177,7 +177,7 @@ public class CreneauLibreDto {
                     break;
             }
         }
-        
+
         // Bonus pour les bonnes tranches horaires
         switch (trancheHoraire) {
             case "MATIN":
@@ -193,7 +193,7 @@ public class CreneauLibreDto {
                 score += 5;
                 break;
         }
-        
+
         // Bonus pour durée appropriée
         if (dureeMinutes >= 60 && dureeMinutes <= 240) {
             score += 25;
@@ -202,16 +202,16 @@ public class CreneauLibreDto {
         } else {
             score += 5;
         }
-        
+
         // Bonus de proximité
         score += Math.min(scoreProximite / 4, 25);
-        
+
         return Math.min(score, 100);
     }
 
     @Override
     public String toString() {
-        return String.format("CreneauLibre{%s - %s, durée=%dmin, score=%d, recommandé=%s}", 
-                           dateDebut, dateFin, dureeMinutes, scoreProximite, recommande);
+        return String.format("CreneauLibre{%s - %s, durée=%dmin, score=%d, recommandé=%s}",
+                dateDebut, dateFin, dureeMinutes, scoreProximite, recommande);
     }
 }

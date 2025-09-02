@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 /**
  * Mapper pour convertir entre Reservation et ReservationDTO
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -34,20 +34,20 @@ public class ReservationMapper {
         }
 
         return new ReservationDTO(
-            reservation.getId(),
-            reservation.getNombrePlaces(),
-            reservation.getMontantTotal(),
-            reservation.getStatut(),
-            reservation.getDateReservation(),
-            reservation.getDateConfirmation(),
-            reservation.getDateAnnulation(),
-            reservation.getCommentaire(),
-            reservation.getUtilisateur() != null ? reservation.getUtilisateur().getId() : null,
-            reservation.getUtilisateur() != null ? reservation.getUtilisateur().getNomComplet() : null,
-            reservation.getUtilisateur() != null ? reservation.getUtilisateur().getEmail() : null,
-            reservation.getEvenement() != null ? reservation.getEvenement().getId() : null,
-            reservation.getEvenement() != null ? reservation.getEvenement().getTitre() : null,
-            reservation.getEvenement() != null ? reservation.getEvenement().getDateDebut() : null
+                reservation.getId(),
+                reservation.getNombrePlaces(),
+                reservation.getMontantTotal(),
+                reservation.getStatut(),
+                reservation.getDateReservation(),
+                reservation.getDateConfirmation(),
+                reservation.getDateAnnulation(),
+                reservation.getCommentaire(),
+                reservation.getUtilisateur() != null ? reservation.getUtilisateur().getId() : null,
+                reservation.getUtilisateur() != null ? reservation.getUtilisateur().getNomComplet() : null,
+                reservation.getUtilisateur() != null ? reservation.getUtilisateur().getEmail() : null,
+                reservation.getEvenement() != null ? reservation.getEvenement().getId() : null,
+                reservation.getEvenement() != null ? reservation.getEvenement().getTitre() : null,
+                reservation.getEvenement() != null ? reservation.getEvenement().getDateDebut() : null
         );
     }
 
@@ -62,16 +62,16 @@ public class ReservationMapper {
         }
 
         return new ReservationDTO(
-            reservation.getId(),
-            reservation.getNombrePlaces(),
-            reservation.getMontantTotal(),
-            reservation.getStatut(),
-            reservation.getDateReservation(),
-            reservation.getDateConfirmation(),
-            reservation.getDateAnnulation(),
-            reservation.getCommentaire(),
-            reservation.getUtilisateur() != null ? utilisateurMapper.toSimpleDTO(reservation.getUtilisateur()) : null,
-            reservation.getEvenement() != null ? evenementMapper.toSimpleDTO(reservation.getEvenement()) : null
+                reservation.getId(),
+                reservation.getNombrePlaces(),
+                reservation.getMontantTotal(),
+                reservation.getStatut(),
+                reservation.getDateReservation(),
+                reservation.getDateConfirmation(),
+                reservation.getDateAnnulation(),
+                reservation.getCommentaire(),
+                reservation.getUtilisateur() != null ? utilisateurMapper.toSimpleDTO(reservation.getUtilisateur()) : null,
+                reservation.getEvenement() != null ? evenementMapper.toSimpleDTO(reservation.getEvenement()) : null
         );
     }
 
@@ -97,7 +97,7 @@ public class ReservationMapper {
 
         // Note: Les entités utilisateur et événement doivent être définies séparément
         // car elles nécessitent un accès aux repositories
-        
+
         return reservation;
     }
 
@@ -116,7 +116,7 @@ public class ReservationMapper {
         reservation.setStatut(dto.getStatut());
         reservation.setDateConfirmation(dto.getDateConfirmation());
         reservation.setDateAnnulation(dto.getDateAnnulation());
-        
+
         if (dto.getCommentaires() != null) {
             reservation.setCommentaire(dto.getCommentaires());
         }
@@ -133,8 +133,8 @@ public class ReservationMapper {
         }
 
         return reservations.stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -148,8 +148,8 @@ public class ReservationMapper {
         }
 
         return reservations.stream()
-            .map(this::toFullDTO)
-            .collect(Collectors.toList());
+                .map(this::toFullDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -163,8 +163,8 @@ public class ReservationMapper {
         }
 
         return dtos.stream()
-            .map(this::toEntity)
-            .collect(Collectors.toList());
+                .map(this::toEntity)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -183,7 +183,7 @@ public class ReservationMapper {
         dto.setMontantTotal(reservation.getMontantTotal());
         dto.setStatut(reservation.getStatut());
         dto.setDateReservation(reservation.getDateReservation());
-        
+
         if (reservation.getEvenement() != null) {
             dto.setEvenementTitre(reservation.getEvenement().getTitre());
             dto.setEvenementDate(reservation.getEvenement().getDateDebut());

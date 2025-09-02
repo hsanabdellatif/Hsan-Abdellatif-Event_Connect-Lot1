@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 /**
  * Service pour la gestion des utilisateurs
  * Implémente UserDetailsService pour l'authentification Spring Security
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -46,17 +46,17 @@ public class UtilisateurService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Utilisateur introuvable avec l'email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur introuvable avec l'email: " + email));
 
         return org.springframework.security.core.userdetails.User.builder()
-            .username(utilisateur.getEmail())
-            .password(utilisateur.getMotDePasse())
-            .authorities(mapRolesToAuthorities(utilisateur.getRoles()))
-            .accountExpired(false)
-            .accountLocked(!utilisateur.getActif())
-            .credentialsExpired(false)
-            .disabled(!utilisateur.getActif())
-            .build();
+                .username(utilisateur.getEmail())
+                .password(utilisateur.getMotDePasse())
+                .authorities(mapRolesToAuthorities(utilisateur.getRoles()))
+                .accountExpired(false)
+                .accountLocked(!utilisateur.getActif())
+                .credentialsExpired(false)
+                .disabled(!utilisateur.getActif())
+                .build();
     }
 
     /**
@@ -64,8 +64,8 @@ public class UtilisateurService implements UserDetailsService {
      */
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(List<Role> roles) {
         return roles.stream()
-            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getNom()))
-            .collect(Collectors.toList());
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getNom()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -74,7 +74,7 @@ public class UtilisateurService implements UserDetailsService {
     @Transactional(readOnly = true)
     public Utilisateur findByEmail(String email) {
         return utilisateurRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable avec l'email: " + email));
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable avec l'email: " + email));
     }
 
     /**
@@ -100,15 +100,15 @@ public class UtilisateurService implements UserDetailsService {
      */
     public Utilisateur creerUtilisateur(Utilisateur utilisateur) {
         log.info("Création d'un nouvel utilisateur avec l'email: {}", utilisateur.getEmail());
-        
+
         if (utilisateurRepository.existsByEmail(utilisateur.getEmail())) {
             throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
         }
-        
+
         // TODO: Hasher le mot de passe avant sauvegarde
         Utilisateur nouvelUtilisateur = utilisateurRepository.save(utilisateur);
         log.info("Utilisateur créé avec succès, ID: {}", nouvelUtilisateur.getId());
-        
+
         return nouvelUtilisateur;
     }
 
@@ -121,48 +121,49 @@ public class UtilisateurService implements UserDetailsService {
      */
     public Utilisateur mettreAJourUtilisateur(Long id, Utilisateur utilisateurMiseAJour) {
         log.info("Mise à jour de l'utilisateur ID: {}", id);
-        
+
         Utilisateur utilisateurExistant = obtenirUtilisateurParId(id);
-        
-        // Vérifier si l'email a changé et s'il est déjà utilisé
+
+        // Vérifier si si l'email a changé et s'il est déjà utilisé
         if (!utilisateurExistant.getEmail().equals(utilisateurMiseAJour.getEmail())) {
             if (utilisateurRepository.existsByEmail(utilisateurMiseAJour.getEmail())) {
                 throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
             }
             utilisateurExistant.setEmail(utilisateurMiseAJour.getEmail());
         }
-        
+
         // Mettre à jour les autres champs
         utilisateurExistant.setNom(utilisateurMiseAJour.getNom());
         utilisateurExistant.setPrenom(utilisateurMiseAJour.getPrenom());
         utilisateurExistant.setTelephone(utilisateurMiseAJour.getTelephone());
-        
+
         // Ne pas permettre la modification du rôle via cette méthode
         // utilisateurExistant.setRole(utilisateurMiseAJour.getRole());
-        
+
         Utilisateur utilisateurSauvegarde = utilisateurRepository.save(utilisateurExistant);
         log.info("Utilisateur mis à jour avec succès, ID: {}", id);
-        
+
         return utilisateurSauvegarde;
     }
 
     /**
      * Supprime un utilisateur (suppression logique)
      * @param id l'ID de l'utilisateur à supprimer
+     * @return réponse de suppression
      */
     public void supprimerUtilisateur(Long id) {
         log.info("Suppression de l'utilisateur ID: {}", id);
-        
+
         Utilisateur utilisateur = obtenirUtilisateurParId(id);
         utilisateur.setActif(false);
         utilisateurRepository.save(utilisateur);
-        
+
         log.info("Utilisateur supprimé avec succès, ID: {}", id);
     }
 
     /**
      * Obtient un utilisateur par son ID
-     * @param id l'ID de l'utilisateur
+     * @param id l'ID del'utilisateur
      * @return l'utilisateur trouvé
      * @throws RuntimeException si l'utilisateur n'existe pas
      */
@@ -231,13 +232,13 @@ public class UtilisateurService implements UserDetailsService {
      */
     public Utilisateur changerRoleUtilisateur(Long id, Utilisateur.RoleUtilisateur nouveauRole) {
         log.info("Changement de rôle pour l'utilisateur ID: {} vers {}", id, nouveauRole);
-        
+
         Utilisateur utilisateur = obtenirUtilisateurParId(id);
         utilisateur.setRole(nouveauRole);
-        
+
         Utilisateur utilisateurSauvegarde = utilisateurRepository.save(utilisateur);
         log.info("Rôle changé avec succès pour l'utilisateur ID: {}", id);
-        
+
         return utilisateurSauvegarde;
     }
 
@@ -249,13 +250,13 @@ public class UtilisateurService implements UserDetailsService {
      */
     public Utilisateur changerStatutUtilisateur(Long id, boolean actif) {
         log.info("Changement de statut pour l'utilisateur ID: {} vers {}", id, actif ? "actif" : "inactif");
-        
+
         Utilisateur utilisateur = obtenirUtilisateurParId(id);
         utilisateur.setActif(actif);
-        
+
         Utilisateur utilisateurSauvegarde = utilisateurRepository.save(utilisateur);
         log.info("Statut changé avec succès pour l'utilisateur ID: {}", id);
-        
+
         return utilisateurSauvegarde;
     }
 
@@ -299,7 +300,7 @@ public class UtilisateurService implements UserDetailsService {
     /**
      * Vérifie si l'utilisateur connecté est le même que celui spécifié ou s'il est admin
      * Utilisé pour les vérifications de sécurité dans les contrôleurs
-     * 
+     *
      * @param utilisateurId ID de l'utilisateur à vérifier
      * @return true si c'est le même utilisateur ou si l'utilisateur connecté est admin
      */
@@ -311,11 +312,11 @@ public class UtilisateurService implements UserDetailsService {
             }
 
             String currentUsername = authentication.getName();
-            
+
             // Vérifier si l'utilisateur a le rôle ADMIN
             boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-            
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
             if (isAdmin) {
                 return true;
             }
@@ -323,7 +324,7 @@ public class UtilisateurService implements UserDetailsService {
             // Vérifier si c'est le même utilisateur
             Utilisateur currentUser = findByEmail(currentUsername);
             return currentUser != null && currentUser.getId().equals(utilisateurId);
-            
+
         } catch (Exception e) {
             log.error("Erreur lors de la vérification des droits d'accès: {}", e.getMessage());
             return false;
@@ -332,7 +333,7 @@ public class UtilisateurService implements UserDetailsService {
 
     /**
      * Obtient l'utilisateur actuellement connecté
-     * 
+     *
      * @return l'utilisateur connecté ou null si aucun utilisateur n'est connecté
      */
     public Utilisateur getCurrentUser() {
@@ -344,7 +345,7 @@ public class UtilisateurService implements UserDetailsService {
 
             String currentUsername = authentication.getName();
             return findByEmail(currentUsername);
-            
+
         } catch (Exception e) {
             log.error("Erreur lors de la récupération de l'utilisateur connecté: {}", e.getMessage());
             return null;

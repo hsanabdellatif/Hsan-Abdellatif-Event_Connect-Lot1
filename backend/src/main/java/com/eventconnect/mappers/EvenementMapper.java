@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 /**
  * Mapper pour convertir entre Evenement et EvenementDTO
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -27,22 +27,22 @@ public class EvenementMapper {
         }
 
         return new EvenementDTO(
-            evenement.getId(),
-            evenement.getTitre(),
-            evenement.getDescription(),
-            evenement.getDateDebut(),
-            evenement.getDateFin(),
-            evenement.getLieu(),
-            evenement.getPlacesMax(),
-            evenement.getPrix(),
-            evenement.getCategorie() != null ? evenement.getCategorie().name() : null,
-            evenement.getImageUrl(),
-            evenement.getDateCreation(),
-            evenement.getDateModification(),
-            evenement.getActif(),
-            null, // placesReservees - sera calculé si nécessaire
-            null, // placesDisponibles - sera calculé si nécessaire
-            null  // chiffreAffaires - sera calculé si nécessaire
+                evenement.getId(),
+                evenement.getTitre(),
+                evenement.getDescription(),
+                evenement.getDateDebut(),
+                evenement.getDateFin(),
+                evenement.getLieu(),
+                evenement.getPlacesMax(),
+                evenement.getPrix(),
+                evenement.getCategorie() != null ? evenement.getCategorie().name() : null,
+                evenement.getImageUrl(),
+                evenement.getDateCreation(),
+                evenement.getDateModification(),
+                evenement.getActif(),
+                null, // placesReservees - sera calculé si nécessaire
+                null, // placesDisponibles - sera calculé si nécessaire
+                null  // chiffreAffaires - sera calculé si nécessaire
         );
     }
 
@@ -61,22 +61,22 @@ public class EvenementMapper {
         Integer placesDisponibles = evenement.getPlacesMax() - (placesReservees != null ? placesReservees : 0);
 
         return new EvenementDTO(
-            evenement.getId(),
-            evenement.getTitre(),
-            evenement.getDescription(),
-            evenement.getDateDebut(),
-            evenement.getDateFin(),
-            evenement.getLieu(),
-            evenement.getPlacesMax(),
-            evenement.getPrix(),
-            evenement.getCategorie() != null ? evenement.getCategorie().name() : null,
-            evenement.getImageUrl(),
-            evenement.getDateCreation(),
-            evenement.getDateModification(),
-            evenement.getActif(),
-            placesReservees,
-            placesDisponibles,
-            chiffreAffaires
+                evenement.getId(),
+                evenement.getTitre(),
+                evenement.getDescription(),
+                evenement.getDateDebut(),
+                evenement.getDateFin(),
+                evenement.getLieu(),
+                evenement.getPlacesMax(),
+                evenement.getPrix(),
+                evenement.getCategorie() != null ? evenement.getCategorie().name() : null,
+                evenement.getImageUrl(),
+                evenement.getDateCreation(),
+                evenement.getDateModification(),
+                evenement.getActif(),
+                placesReservees,
+                placesDisponibles,
+                chiffreAffaires
         );
     }
 
@@ -130,11 +130,11 @@ public class EvenementMapper {
         if (dto.getCategorie() != null) {
             evenement.setCategorie(Evenement.CategorieEvenement.valueOf(dto.getCategorie()));
         }
-        
+
         if (dto.getImageUrl() != null) {
             evenement.setImageUrl(dto.getImageUrl());
         }
-        
+
         if (dto.getActif() != null) {
             evenement.setActif(dto.getActif());
         }
@@ -151,8 +151,8 @@ public class EvenementMapper {
         }
 
         return evenements.stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -166,8 +166,8 @@ public class EvenementMapper {
         }
 
         return dtos.stream()
-            .map(this::toEntity)
-            .collect(Collectors.toList());
+                .map(this::toEntity)
+                .collect(Collectors.toList());
     }
 
     /**

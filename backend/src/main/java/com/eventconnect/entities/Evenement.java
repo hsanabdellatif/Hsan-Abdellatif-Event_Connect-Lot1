@@ -1,6 +1,7 @@
 package com.eventconnect.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 /**
  * Entité représentant un événement dans l'application EventConnect
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -88,16 +89,17 @@ public class Evenement {
     private Utilisateur organisateur;
 
     @OneToMany(mappedBy = "evenement", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("event-reservations")
     private List<Reservation> reservations = new ArrayList<>();
 
     // Constructeurs
     public Evenement() {}
 
-    public Evenement(Long id, String titre, String description, LocalDateTime dateDebut, 
-                    LocalDateTime dateFin, String lieu, Integer placesMax, Integer placesDisponibles,
-                    BigDecimal prix, CategorieEvenement categorie, StatutEvenement statut, 
-                    String imageUrl, LocalDateTime dateCreation, LocalDateTime dateModification, 
-                    Boolean actif, Utilisateur organisateur, List<Reservation> reservations) {
+    public Evenement(Long id, String titre, String description, LocalDateTime dateDebut,
+                     LocalDateTime dateFin, String lieu, Integer placesMax, Integer placesDisponibles,
+                     BigDecimal prix, CategorieEvenement categorie, StatutEvenement statut,
+                     String imageUrl, LocalDateTime dateCreation, LocalDateTime dateModification,
+                     Boolean actif, Utilisateur organisateur, List<Reservation> reservations) {
         this.id = id;
         this.titre = titre;
         this.description = description;
@@ -252,10 +254,10 @@ public class Evenement {
      * Méthode utilitaire pour vérifier si l'événement est ouvert aux réservations
      */
     public boolean isOuvertAuxReservations() {
-        return this.actif && 
-               this.statut == StatutEvenement.PLANIFIE && 
-               !isComplet() && 
-               this.dateDebut.isAfter(LocalDateTime.now());
+        return this.actif &&
+                this.statut == StatutEvenement.PLANIFIE &&
+                !isComplet() &&
+                this.dateDebut.isAfter(LocalDateTime.now());
     }
 
     /**

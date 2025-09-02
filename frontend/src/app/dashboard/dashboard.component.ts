@@ -3,6 +3,8 @@ import * as Chartist from 'chartist';
 import { EventService } from '../services/event.service';
 import { UserService } from '../services/user.service';
 import { ReservationService } from '../services/reservation.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,9 +13,18 @@ import { ReservationService } from '../services/reservation.service';
 })
 export class DashboardComponent implements OnInit {
 
-  dashboardStats: any = {};
+  dashboardStats: any = {
+    totalEvents: 0,
+    activeEvents: 0,
+    totalUsers: 0,
+    totalReservations: 0,
+    pendingReservations: 0,
+    revenue: 0
+  };
   recentEvents: any[] = [];
   recentReservations: any[] = [];
+  loading = true;
+  error = '';
 
   constructor(
     private eventService: EventService,
@@ -90,41 +101,102 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadStats() {
-    Promise.all([
-      this.eventService.getEventStats().toPromise(),
-      this.userService.getUserStats().toPromise(),
-      this.reservationService.getReservationStats().toPromise()
-    ]).then(([eventStats, userStats, reservationStats]) => {
-      this.dashboardStats = {
-        totalEvents: eventStats.totalEvents,
-        activeEvents: eventStats.activeEvents,
-        totalUsers: userStats.totalUsers,
-        totalReservations: reservationStats.totalReservations,
-        pendingReservations: reservationStats.pendingReservations,
-        revenue: reservationStats.totalRevenue
-      };
+    this.loading = true;
+    this.error = '';
+    let loadedCount = 0;
+    const totalLoads = 3;
+
+    const checkLoading = () => {
+      loadedCount++;
+      if (loadedCount === totalLoads) {
+        this.loading = false;
+      }
+    };
+    
+    // Charger les statistiques une par une pour mieux gérer les erreurs
+    this.eventService.getEventStats().pipe(
+      catchError(err => {
+        console.error('Erreur lors du chargement des stats événements:', err);
+        return of({ totalEvents: 0, activeEvents: 0 });
+      })
+    ).subscribe({
+      next: (eventStats) => {
+        this.dashboardStats.totalEvents = eventStats.totalEvents || 0;
+        this.dashboardStats.activeEvents = eventStats.activeEvents || 0;
+        checkLoading();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des stats événements:', error);
+        this.error = 'Erreur lors du chargement des statistiques des événements';
+        checkLoading();
+      }
+    });
+
+    this.userService.getUserStats().pipe(
+      catchError(err => {
+        console.error('Erreur lors du chargement des stats utilisateurs:', err);
+        return of({ totalUsers: 0 });
+      })
+    ).subscribe({
+      next: (userStats) => {
+        this.dashboardStats.totalUsers = userStats.totalUsers || 0;
+        checkLoading();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des stats utilisateurs:', error);
+        this.error = 'Erreur lors du chargement des statistiques des utilisateurs';
+        checkLoading();
+      }
+    });
+
+    this.reservationService.getReservationStats().pipe(
+      catchError(err => {
+        console.error('Erreur lors du chargement des stats réservations:', err);
+        return of({ totalReservations: 0, pendingReservations: 0, totalRevenue: 0 });
+      })
+    ).subscribe({
+      next: (reservationStats) => {
+        this.dashboardStats.totalReservations = reservationStats.totalReservations || 0;
+        this.dashboardStats.pendingReservations = reservationStats.pendingReservations || 0;
+        this.dashboardStats.revenue = reservationStats.totalRevenue || 0;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des stats réservations:', error);
+        this.error = 'Erreur lors du chargement des données. Veuillez réessayer plus tard.';
+        this.loading = false;
+      }
     });
   }
 
   private loadRecentEvents() {
-    this.eventService.getActiveEvents().subscribe(events => {
+    this.eventService.getActiveEvents().pipe(
+      catchError(error => {
+        console.error('Erreur lors du chargement des événements récents:', error);
+        this.error = 'Erreur lors du chargement des événements';
+        return of([]);
+      })
+    ).subscribe(events => {
       this.recentEvents = events.slice(0, 3).map(event => ({
-        nom: event.nom,
+        nom: event.titre || 'Sans titre',
         date: event.dateDebut,
-        reservations: event.placesReservees || 0
+        reservations: event.placesMax - event.placesDisponibles || 0
       }));
     });
   }
-
   private loadRecentReservations() {
-    this.reservationService.getAllReservations().subscribe(reservations => {
-      this.recentReservations = reservations
-        .slice(0, 3)
-        .map(reservation => ({
-          utilisateur: `${reservation.utilisateurNom}`,
-          evenement: reservation.evenementNom,
-          statut: reservation.statut
-        }));
+    this.reservationService.getAllReservations().pipe(
+      catchError(error => {
+        console.error('Erreur lors du chargement des réservations récentes:', error);
+        this.error = 'Erreur lors du chargement des réservations';
+        return of([]);
+      })
+    ).subscribe(reservations => {
+      this.recentReservations = reservations.slice(0, 3).map(reservation => ({
+        utilisateur: reservation.utilisateurNom || 'Utilisateur inconnu',
+        evenement: reservation.evenementNom || 'Événement inconnu',
+        statut: reservation.statut || 'EN_ATTENTE'
+      }));
     });
   }
 

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 /**
  * DTO pour l'entité Utilisateur
  * Utilisé pour les transferts de données dans les APIs
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */

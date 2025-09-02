@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * DTO pour les réponses d'erreur standardisées
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
@@ -19,6 +19,7 @@ public class ErrorResponse {
     private LocalDateTime timestamp;
 
     private int status;
+    private String statusText;
     private String error;
     private String message;
     private String path;

@@ -7,13 +7,13 @@ import java.time.LocalDateTime;
 /**
  * Entité représentant une évaluation d'événement par un utilisateur
  * Système de notation 5 étoiles avec commentaires
- * 
+ *
  * @author EventConnect Team
  * @since 2.0.0
  */
 @Entity
-@Table(name = "evaluations", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "evenement_id"}))
+@Table(name = "evaluations",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "evenement_id"}))
 public class Evaluation {
 
     @Id
@@ -74,7 +74,7 @@ public class Evaluation {
 
     /**
      * Constructeur avec paramètres principaux
-     * 
+     *
      * @param utilisateur l'utilisateur qui évalue
      * @param evenement l'événement évalué
      * @param note la note de 1 à 5 étoiles
@@ -144,7 +144,7 @@ public class Evaluation {
 
     /**
      * Vérifie si l'évaluation est positive (4+ étoiles)
-     * 
+     *
      * @return true si l'évaluation est positive
      */
     public boolean isPositive() {
@@ -153,13 +153,13 @@ public class Evaluation {
 
     /**
      * Vérifie si l'évaluation nécessite une modération
-     * 
+     *
      * @return true si modération nécessaire
      */
     public boolean necessiteModerationl() {
-        return this.signale >= 2 || 
-               (this.commentaire != null && this.commentaire.length() > 500) ||
-               this.note <= 2;
+        return this.signale >= 2 ||
+                (this.commentaire != null && this.commentaire.length() > 500) ||
+                this.note <= 2;
     }
 
     // Getters et Setters
@@ -271,11 +271,11 @@ public class Evaluation {
 
     @Override
     public String toString() {
-        return String.format("Evaluation{id=%d, utilisateur=%s, evenement=%s, note=%d, recommande=%s}", 
-                           id, 
-                           utilisateur != null ? utilisateur.getEmail() : "null",
-                           evenement != null ? evenement.getTitre() : "null",
-                           note, 
-                           recommande);
+        return String.format("Evaluation{id=%d, utilisateur=%s, evenement=%s, note=%d, recommande=%s}",
+                id,
+                utilisateur != null ? utilisateur.getEmail() : "null",
+                evenement != null ? evenement.getTitre() : "null",
+                note,
+                recommande);
     }
 }

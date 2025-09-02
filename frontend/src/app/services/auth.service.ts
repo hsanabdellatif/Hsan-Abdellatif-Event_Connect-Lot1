@@ -49,4 +49,15 @@ export class AuthService {
   isAuthenticated(): boolean {
     return !!this.currentUserValue;
   }
+
+  updateProfile(userData: any) {
+    return this.http.put(`${this.apiUrl}/profile`, userData).pipe(
+      tap((updatedUser: any) => {
+        const currentUser = this.currentUserValue;
+        const newUserData = { ...currentUser, ...updatedUser };
+        localStorage.setItem('currentUser', JSON.stringify(newUserData));
+        this.currentUserSubject.next(newUserData);
+      })
+    );
+  }
 }

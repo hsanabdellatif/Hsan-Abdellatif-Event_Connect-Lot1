@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * DTO pour les résultats de vérification de conflit d'agenda
  * Contient les informations sur la présence de conflits et les détails associés
- * 
+ *
  * @author EventConnect Team
  * @since 2.0.0
  */
@@ -28,7 +28,7 @@ public class VerificationConflitDto {
 
     /**
      * Constructeur avec paramètres principaux
-     * 
+     *
      * @param conflitDetecte true si des conflits sont détectés
      * @param message message descriptif du résultat
      * @param conflits liste des conflits détectés
@@ -111,7 +111,7 @@ public class VerificationConflitDto {
 
         /**
          * Constructeur avec paramètres
-         * 
+         *
          * @param evenementId ID de l'événement en conflit
          * @param nomEvenement nom de l'événement
          * @param dateDebut date de début de l'événement
@@ -119,8 +119,8 @@ public class VerificationConflitDto {
          * @param lieu lieu de l'événement
          * @param typeConflit type de conflit détecté
          */
-        public ConflitDetailDto(Long evenementId, String nomEvenement, LocalDateTime dateDebut, 
-                               LocalDateTime dateFin, String lieu, String typeConflit) {
+        public ConflitDetailDto(Long evenementId, String nomEvenement, LocalDateTime dateDebut,
+                                LocalDateTime dateFin, String lieu, String typeConflit) {
             this.evenementId = evenementId;
             this.nomEvenement = nomEvenement;
             this.dateDebut = dateDebut;

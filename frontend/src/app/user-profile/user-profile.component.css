@@ -1,0 +1,37 @@
+.stats {
+    padding: 15px 0;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    color: #555;
+}
+
+.stat-item .material-icons {
+    margin-right: 8px;
+    color: #9c27b0;
+}
+
+.example-full-width {
+    width: 100%;
+}
+
+.card-profile .card-avatar {
+    max-width: 130px;
+    max-height: 130px;
+    margin: -50px auto 0;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.card-profile .card-avatar img {
+    width: 100%;
+    height: auto;
+}
+
+.btn-primary {
+    margin-top: 20px;
+}

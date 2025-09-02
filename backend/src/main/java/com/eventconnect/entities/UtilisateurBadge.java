@@ -7,13 +7,13 @@ import java.time.LocalDateTime;
 
 /**
  * Entité représentant l'attribution d'un badge à un utilisateur
- * 
+ *
  * @author EventConnect Team
  * @version 2.0.0
  */
 @Entity
 @Table(name = "utilisateur_badges",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "badge_id"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "badge_id"}))
 public class UtilisateurBadge {
 
     @Id
@@ -63,8 +63,8 @@ public class UtilisateurBadge {
     public void setDateObtention(LocalDateTime dateObtention) { this.dateObtention = dateObtention; }
 
     public Integer getPointsAuMomentObtention() { return pointsAuMomentObtention; }
-    public void setPointsAuMomentObtention(Integer pointsAuMomentObtention) { 
-        this.pointsAuMomentObtention = pointsAuMomentObtention; 
+    public void setPointsAuMomentObtention(Integer pointsAuMomentObtention) {
+        this.pointsAuMomentObtention = pointsAuMomentObtention;
     }
 
     public String getCommentaire() { return commentaire; }
@@ -74,8 +74,8 @@ public class UtilisateurBadge {
     public String toString() {
         return "UtilisateurBadge{" +
                 "id=" + id +
-                ", utilisateur=" + (utilisateur != null ? utilisateur.getEmail() : null) +
-                ", badge=" + (badge != null ? badge.getNom() : null) +
+                ", utilisateur=" + (utilisateur != null ? utilisateur.getEmail() : "null") +
+                ", badge=" + (badge != null ? badge.getNom() : "null") +
                 ", dateObtention=" + dateObtention +
                 '}';
     }
