@@ -3,12 +3,12 @@ package com.eventconnect.repositories;
 import com.eventconnect.entities.Evenement;
 import com.eventconnect.entities.Reservation;
 import com.eventconnect.entities.Utilisateur;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,16 +18,17 @@ import java.util.Optional;
  * Repository pour l'entité Reservation
  *
  * @author EventConnect Team
- * @version 2.0.0
+ * @version 2.0.2
  */
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     /**
      * Trouve toutes les réservations actives
+     * @param pageable paramètres de pagination
      * @return Liste des réservations actives
      */
-    List<Reservation> findByActifTrue();
+    List<Reservation> findByActifTrue(Pageable pageable);
 
     /**
      * Trouve toutes les réservations par statut
@@ -111,7 +112,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findReservationsEnAttente();
 
     /**
-     * Trouve les réservations expirées (en attente depuis plus de X heures)
+     * Trouve les réservations expirées
      * @param dateExpiration date limite pour considérer une réservation comme expirée
      * @return Liste des réservations expirées
      */
@@ -197,7 +198,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                 @Param("dateFin") LocalDateTime dateFin);
 
     /**
-     * Trouve les utilisateurs les plus actifs (avec le plus de réservations)
+     * Trouve les utilisateurs les plus actifs
      * @param pageable pagination pour limiter les résultats
      * @return Liste des utilisateurs les plus actifs
      */
@@ -209,7 +210,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     /**
      * Trouve les réservations qui peuvent être remboursées
-     * @param dateMinimum date minimum pour le remboursement (24h avant l'événement)
+     * @param dateMinimum date minimum pour le remboursement
      * @return Liste des réservations remboursables
      */
     @Query("SELECT r FROM Reservation r WHERE r.statut = 'CONFIRMEE' " +
@@ -233,6 +234,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
             "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
     Integer countPlacesReserveesForEvenement(@Param("evenementId") Long evenementId);
+
+    /**
+     * Trouve une réservation par ID avec détails
+     * @param id l'ID de la réservation
+     * @return Optional contenant la réservation
+     */
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.utilisateur JOIN FETCH r.evenement WHERE r.id = :id")
+    Optional<Reservation> findByIdWithDetails(@Param("id") Long id);
+
     /**
      * Trouve les réservations d'un utilisateur dans une période donnée
      * @param utilisateur l'utilisateur

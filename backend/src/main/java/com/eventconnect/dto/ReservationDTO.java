@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * Utilisé pour les transferts de données dans les APIs
  *
  * @author EventConnect Team
- * @version 2.0.0
+ * @version 2.0.1
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReservationDTO {
@@ -40,13 +40,10 @@ public class ReservationDTO {
 
     private String commentaires;
 
-    // Informations sur l'utilisateur (nested DTO)
     private UtilisateurDTO utilisateur;
 
-    // Informations sur l'événement (nested DTO)
     private EvenementDTO evenement;
 
-    // Informations simplifiées pour les listes
     private Long utilisateurId;
     private String utilisateurNom;
     private String utilisateurEmail;
@@ -55,7 +52,6 @@ public class ReservationDTO {
     private String evenementTitre;
     private LocalDateTime evenementDate;
 
-    // Constructeurs
     public ReservationDTO() {}
 
     public ReservationDTO(Long id, Integer nombrePlaces, BigDecimal montantTotal, StatutReservation statut,
@@ -81,7 +77,6 @@ public class ReservationDTO {
         this.evenementDate = evenementDate;
     }
 
-    // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -130,18 +125,12 @@ public class ReservationDTO {
     public LocalDateTime getEvenementDate() { return evenementDate; }
     public void setEvenementDate(LocalDateTime evenementDate) { this.evenementDate = evenementDate; }
 
-    /**
-     * Constructeur pour la création de réservation
-     */
     public ReservationDTO(Long utilisateurId, Long evenementId, Integer nombrePlaces) {
         this.utilisateurId = utilisateurId;
         this.evenementId = evenementId;
         this.nombrePlaces = nombrePlaces;
     }
 
-    /**
-     * Constructeur complet pour la lecture
-     */
     public ReservationDTO(Long id, Integer nombrePlaces, BigDecimal montantTotal, StatutReservation statut,
                           LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
                           String commentaires, Long utilisateurId, String utilisateurNom, String utilisateurEmail,
@@ -162,9 +151,6 @@ public class ReservationDTO {
         this.evenementDate = evenementDate;
     }
 
-    /**
-     * Constructeur avec DTOs complets
-     */
     public ReservationDTO(Long id, Integer nombrePlaces, BigDecimal montantTotal, StatutReservation statut,
                           LocalDateTime dateReservation, LocalDateTime dateConfirmation, LocalDateTime dateAnnulation,
                           String commentaires, UtilisateurDTO utilisateur, EvenementDTO evenement) {
@@ -180,26 +166,14 @@ public class ReservationDTO {
         this.evenement = evenement;
     }
 
-    /**
-     * Vérifie si la réservation peut être annulée
-     * @return true si annulable
-     */
     public boolean isAnnulable() {
         return statut == StatutReservation.EN_ATTENTE || statut == StatutReservation.CONFIRMEE;
     }
 
-    /**
-     * Vérifie si la réservation peut être confirmée
-     * @return true si confirmable
-     */
     public boolean isConfirmable() {
         return statut == StatutReservation.EN_ATTENTE;
     }
 
-    /**
-     * Calcule le prix unitaire par place
-     * @return prix par place
-     */
     public BigDecimal getPrixParPlace() {
         if (montantTotal != null && nombrePlaces != null && nombrePlaces > 0) {
             return montantTotal.divide(new BigDecimal(nombrePlaces), 2, BigDecimal.ROUND_HALF_UP);
@@ -207,19 +181,11 @@ public class ReservationDTO {
         return BigDecimal.ZERO;
     }
 
-    /**
-     * Retourne un résumé de la réservation
-     * @return résumé
-     */
     public String getResume() {
         return String.format("Réservation #%d - %s places pour %s (%s)",
                 id, nombrePlaces, evenementTitre, statut);
     }
 
-    /**
-     * Vérifie si la réservation est active
-     * @return true si active
-     */
     public boolean isActive() {
         return statut == StatutReservation.EN_ATTENTE || statut == StatutReservation.CONFIRMEE;
     }

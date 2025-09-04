@@ -10,14 +10,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entité représentant un événement dans l'application EventConnect
- *
- * @author EventConnect Team
- * @version 2.0.0
- */
 @Entity
-@Table(name = "evenements")
+@Table(name = "evenements", indexes = {
+        @Index(name = "idx_evenement_titre", columnList = "titre"),
+        @Index(name = "idx_evenement_categorie", columnList = "categorie"),
+        @Index(name = "idx_evenement_dates", columnList = "date_debut, date_fin")
+})
 public class Evenement {
 
     @Id
@@ -78,10 +76,9 @@ public class Evenement {
     @Column(name = "date_modification")
     private LocalDateTime dateModification;
 
-    @Column(name = "actif")
+    @Column(name = "actif", nullable = false)
     private Boolean actif = true;
 
-    // Relations
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisateur_id", nullable = false)
     @NotNull(message = "L'organisateur est obligatoire")
@@ -92,34 +89,31 @@ public class Evenement {
     @JsonManagedReference("event-reservations")
     private List<Reservation> reservations = new ArrayList<>();
 
-    // Constructeurs
-    public Evenement() {}
+    // Constructeurs, getters, setters, et autres méthodes inchangés...
 
-    public Evenement(Long id, String titre, String description, LocalDateTime dateDebut,
-                     LocalDateTime dateFin, String lieu, Integer placesMax, Integer placesDisponibles,
-                     BigDecimal prix, CategorieEvenement categorie, StatutEvenement statut,
-                     String imageUrl, LocalDateTime dateCreation, LocalDateTime dateModification,
-                     Boolean actif, Utilisateur organisateur, List<Reservation> reservations) {
-        this.id = id;
-        this.titre = titre;
-        this.description = description;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-        this.lieu = lieu;
-        this.placesMax = placesMax;
-        this.placesDisponibles = placesDisponibles;
-        this.prix = prix;
-        this.categorie = categorie;
-        this.statut = statut;
-        this.imageUrl = imageUrl;
-        this.dateCreation = dateCreation;
-        this.dateModification = dateModification;
-        this.actif = actif;
-        this.organisateur = organisateur;
-        this.reservations = reservations;
+    @PrePersist
+    public void prePersist() {
+        if (this.placesMax == null) {
+            throw new IllegalArgumentException("Le nombre de places maximum doit être défini");
+        }
+        if (this.placesDisponibles == null) {
+            this.placesDisponibles = this.placesMax;
+        }
+        if (this.actif == null) {
+            this.actif = true;
+        }
     }
 
-    // Getters et Setters
+    @PreUpdate
+    public void preUpdate() {
+        this.dateModification = LocalDateTime.now();
+    }
+
+    @AssertTrue(message = "La date de fin doit être après la date de début")
+    public boolean isDateFinValid() {
+        return dateFin == null || dateDebut == null || dateFin.isAfter(dateDebut);
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -171,35 +165,29 @@ public class Evenement {
     public List<Reservation> getReservations() { return reservations; }
     public void setReservations(List<Reservation> reservations) { this.reservations = reservations; }
 
-    /**
-     * Méthode appelée avant la mise à jour de l'entité
-     */
-    @PreUpdate
-    public void preUpdate() {
-        this.dateModification = LocalDateTime.now();
+    public boolean isComplet() {
+        return this.placesDisponibles <= 0;
     }
 
-    /**
-     * Méthode appelée avant la persistance de l'entité
-     */
-    @PrePersist
-    public void prePersist() {
-        if (this.placesDisponibles == null) {
-            this.placesDisponibles = this.placesMax;
+    public boolean isOuvertAuxReservations() {
+        return Boolean.TRUE.equals(this.actif) &&
+                this.statut == StatutEvenement.PLANIFIE &&
+                !isComplet() &&
+                this.dateDebut.isAfter(LocalDateTime.now());
+    }
+
+    public void diminuerPlacesDisponibles(int nombre) {
+        if (this.placesDisponibles >= nombre) {
+            this.placesDisponibles -= nombre;
+        } else {
+            throw new IllegalStateException("Pas assez de places disponibles");
         }
     }
 
-    /**
-     * Validation personnalisée pour s'assurer que la date de fin est après la date de début
-     */
-    @AssertTrue(message = "La date de fin doit être après la date de début")
-    public boolean isDateFinValid() {
-        return dateFin == null || dateDebut == null || dateFin.isAfter(dateDebut);
+    public void augmenterPlacesDisponibles(int nombre) {
+        this.placesDisponibles = Math.min(this.placesDisponibles + nombre, this.placesMax);
     }
 
-    /**
-     * Enum pour les catégories d'événements
-     */
     public enum CategorieEvenement {
         CONFERENCE("Conférence"),
         WORKSHOP("Atelier"),
@@ -222,9 +210,6 @@ public class Evenement {
         }
     }
 
-    /**
-     * Enum pour les statuts d'événements
-     */
     public enum StatutEvenement {
         PLANIFIE("Planifié"),
         EN_COURS("En cours"),
@@ -241,40 +226,5 @@ public class Evenement {
         public String getLibelle() {
             return libelle;
         }
-    }
-
-    /**
-     * Méthode utilitaire pour vérifier si l'événement est complet
-     */
-    public boolean isComplet() {
-        return this.placesDisponibles <= 0;
-    }
-
-    /**
-     * Méthode utilitaire pour vérifier si l'événement est ouvert aux réservations
-     */
-    public boolean isOuvertAuxReservations() {
-        return this.actif &&
-                this.statut == StatutEvenement.PLANIFIE &&
-                !isComplet() &&
-                this.dateDebut.isAfter(LocalDateTime.now());
-    }
-
-    /**
-     * Méthode utilitaire pour diminuer le nombre de places disponibles
-     */
-    public void diminuerPlacesDisponibles(int nombre) {
-        if (this.placesDisponibles >= nombre) {
-            this.placesDisponibles -= nombre;
-        } else {
-            throw new IllegalStateException("Pas assez de places disponibles");
-        }
-    }
-
-    /**
-     * Méthode utilitaire pour augmenter le nombre de places disponibles
-     */
-    public void augmenterPlacesDisponibles(int nombre) {
-        this.placesDisponibles = Math.min(this.placesDisponibles + nombre, this.placesMax);
     }
 }

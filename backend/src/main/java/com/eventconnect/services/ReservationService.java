@@ -9,6 +9,7 @@ import com.eventconnect.repositories.UtilisateurRepository;
 import com.eventconnect.dto.ReservationStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,7 @@ import java.util.Optional;
  * Service pour la gestion des réservations
  *
  * @author EventConnect Team
- * @version 2.0.0
+ * @version 2.0.2
  */
 @Service
 @Transactional
@@ -58,18 +59,18 @@ public class ReservationService {
 
         // Vérification de l'existence de l'utilisateur
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         // Vérification de l'existence de l'événement
         Evenement evenement = evenementRepository.findById(evenementId)
-                .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + evenementId));
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
 
         // Vérification que l'événement est dans le futur
         if (evenement.getDateDebut().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Impossible de réserver un événement passé");
         }
 
-        // Vérification qu'il n'existe pas déjà une réservation pour cet utilisateur et cet événement
+        // Vérification qu'il n'existe pas déjà une réservation
         Optional<Reservation> reservationExistante = reservationRepository
                 .findByUtilisateurAndEvenement(utilisateur, evenement);
         if (reservationExistante.isPresent()) {
@@ -109,7 +110,7 @@ public class ReservationService {
         log.info("Confirmation de la réservation ID: {}", reservationId);
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'ID: " + reservationId));
+                .orElseThrow(() -> new RuntimeException("Réservation non trouvée"));
 
         if (reservation.getStatut() != Reservation.StatutReservation.EN_ATTENTE) {
             throw new RuntimeException("Seules les réservations en attente peuvent être confirmées");
@@ -139,19 +140,64 @@ public class ReservationService {
         log.info("Annulation de la réservation ID: {}", reservationId);
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'ID: " + reservationId));
+                .orElseThrow(() -> new RuntimeException("Réservation non trouvée"));
 
-        if (reservation.getStatut() == Reservation.StatutReservation.ANNULEE) {
-            throw new RuntimeException("Cette réservation est déjà annulée");
-        }
-
-        reservation.setStatut(Reservation.StatutReservation.ANNULEE);
-        reservation.setDateAnnulation(LocalDateTime.now());
-
+        reservation.annuler(); // Appelle la méthode de l'entité qui libère les places
         Reservation reservationAnnulee = reservationRepository.save(reservation);
         log.info("Réservation annulée avec succès, ID: {}", reservationAnnulee.getId());
 
         return reservationAnnulee;
+    }
+
+    /**
+     * Met à jour une réservation
+     * @param id l'ID de la réservation
+     * @param nombrePlaces le nouveau nombre de places
+     * @param commentaire le nouveau commentaire
+     * @return la réservation mise à jour
+     * @throws RuntimeException si la réservation ne peut pas être mise à jour
+     */
+    public Reservation mettreAJourReservation(Long id, Integer nombrePlaces, String commentaire) {
+        log.info("Mise à jour de la réservation ID: {}", id);
+
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Réservation non trouvée"));
+
+        if (!reservation.isModifiable()) {
+            throw new RuntimeException("La réservation n'est pas modifiable");
+        }
+
+        // Vérifier la disponibilité des places
+        int placesDejaReservees = reservation.getNombrePlaces();
+        int placesSupplementaires = nombrePlaces - placesDejaReservees;
+
+        if (placesSupplementaires > 0 && !evenementService.verifierDisponibilite(reservation.getEvenement().getId(), placesSupplementaires)) {
+            throw new RuntimeException("Pas assez de places disponibles pour cet événement");
+        }
+
+        // Mettre à jour les champs
+        reservation.setNombrePlaces(nombrePlaces);
+        reservation.setCommentaire(commentaire);
+        reservation.setMontantTotal(reservation.getEvenement().getPrix().multiply(new BigDecimal(nombrePlaces)));
+        reservation.setDateModification(LocalDateTime.now());
+
+        return reservationRepository.save(reservation);
+    }
+
+    /**
+     * Rembourse une réservation
+     * @param reservationId l'ID de la réservation
+     * @return la réservation remboursée
+     * @throws RuntimeException si la réservation ne peut pas être remboursée
+     */
+    public Reservation rembourserReservation(Long reservationId) {
+        log.info("Remboursement de la réservation ID: {}", reservationId);
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Réservation non trouvée"));
+
+        reservation.marquerCommeRemboursee();
+        return reservationRepository.save(reservation);
     }
 
     /**
@@ -162,7 +208,18 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public Optional<Reservation> trouverParId(Long id) {
         log.info("Recherche de la réservation ID: {}", id);
-        return reservationRepository.findById(id);
+        return reservationRepository.findByIdWithDetails(id);
+    }
+
+    /**
+     * Récupère toutes les réservations
+     * @param pageable paramètres de pagination
+     * @return liste des réservations actives
+     */
+    @Transactional(readOnly = true)
+    public List<Reservation> obtenirToutesReservations(Pageable pageable) {
+        log.info("Récupération de toutes les réservations");
+        return reservationRepository.findByActifTrue(pageable);
     }
 
     /**
@@ -175,7 +232,7 @@ public class ReservationService {
         log.info("Récupération des réservations de l'utilisateur ID: {}", utilisateurId);
 
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         return reservationRepository.findByUtilisateur(utilisateur);
     }
@@ -190,7 +247,7 @@ public class ReservationService {
         log.info("Récupération des réservations de l'événement ID: {}", evenementId);
 
         Evenement evenement = evenementRepository.findById(evenementId)
-                .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + evenementId));
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
 
         return reservationRepository.findByEvenement(evenement);
     }
@@ -215,7 +272,7 @@ public class ReservationService {
         log.info("Suppression de la réservation ID: {}", id);
 
         if (!reservationRepository.existsById(id)) {
-            throw new RuntimeException("Réservation non trouvée avec l'ID: " + id);
+            throw new RuntimeException("Réservation non trouvée");
         }
 
         reservationRepository.deleteById(id);
@@ -241,7 +298,7 @@ public class ReservationService {
      */
     @Transactional(readOnly = true)
     public long compterReservations() {
-        return reservationRepository.count();
+        return reservationRepository.countByActifTrue();
     }
 
     /**
@@ -256,11 +313,20 @@ public class ReservationService {
 
         // Calcul des totaux par statut
         stats.setTotalReservations(reservationRepository.countByActifTrue());
-        stats.setPendingReservations(reservationRepository.countByStatutAndActifTrue(Reservation.StatutReservation.EN_ATTENTE));
-        stats.setTotalRevenue(reservationRepository.calculateChiffredAffairesPeriode(
-                LocalDateTime.of(2000, 1, 1, 0, 0), // Date de début suffisamment ancienne
+        stats.setReservationsConfirmees(reservationRepository.countByStatutAndActifTrue(Reservation.StatutReservation.CONFIRMEE));
+        stats.setReservationsEnAttente(reservationRepository.countByStatutAndActifTrue(Reservation.StatutReservation.EN_ATTENTE));
+        stats.setReservationsAnnulees(reservationRepository.countByStatutAndActifTrue(Reservation.StatutReservation.ANNULEE));
+
+        // Calcul du chiffre d'affaires total
+        BigDecimal chiffreAffairesTotal = reservationRepository.calculateChiffredAffairesPeriode(
+                LocalDateTime.of(2000, 1, 1, 0, 0),
                 LocalDateTime.now()
-        ).longValue());
+        );
+        stats.setChiffreAffairesTotal(chiffreAffairesTotal != null ? chiffreAffairesTotal : BigDecimal.ZERO);
+
+        // Calcul du taux de confirmation
+        stats.setTauxConfirmation(stats.getTotalReservations() > 0 ?
+                (double) stats.getReservationsConfirmees() / stats.getTotalReservations() * 100 : 0.0);
 
         return stats;
     }

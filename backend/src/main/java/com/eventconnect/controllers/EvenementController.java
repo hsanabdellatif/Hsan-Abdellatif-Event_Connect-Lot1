@@ -13,11 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * Contrôleur REST pour la gestion des événements
@@ -32,19 +28,30 @@ public class EvenementController {
 
     private static final Logger log = LoggerFactory.getLogger(EvenementController.class);
     private final EvenementService evenementService;
+    private static final List<String> ALLOWED_SORT_FIELDS = Arrays.asList("titre", "dateDebut", "dateFin", "prix", "lieu");
 
     public EvenementController(EvenementService evenementService) {
         this.evenementService = evenementService;
     }
 
-    /**
-     * Crée un nouvel événement
-     * @param evenement les données de l'événement à créer
-     * @return l'événement créé
-     */
+    private static class ErrorResponse {
+        private String message;
+        private String details;
+        private int status;
+
+        public ErrorResponse(String message, String details, int status) {
+            this.message = message;
+            this.details = details;
+            this.status = status;
+        }
+
+        public String getMessage() { return message; }
+        public String getDetails() { return details; }
+        public int getStatus() { return status; }
+    }
 
     @PostMapping
-    public ResponseEntity<Evenement> creerEvenement(@Valid @RequestBody Evenement evenement) {
+    public ResponseEntity<?> creerEvenement(@Valid @RequestBody Evenement evenement) {
         log.info("POST /evenements - Création d'un événement: {}", evenement.getTitre());
 
         try {
@@ -52,38 +59,28 @@ public class EvenementController {
             return ResponseEntity.status(HttpStatus.CREATED).body(nouvelEvenement);
         } catch (IllegalArgumentException e) {
             log.error("Erreur lors de la création de l'événement: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Validation Error", e.getMessage(), HttpStatus.BAD_REQUEST.value()));
         } catch (Exception e) {
             log.error("Erreur inattendue lors de la création de l'événement", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
-
-    /**
-     * Récupère un événement par son ID
-     * @param id l'ID de l'événement
-     * @return l'événement trouvé
-     */
+/*
     @GetMapping("/{id}")
-    public ResponseEntity<Evenement> obtenirEvenement(@PathVariable Long id) {
+    public ResponseEntity<?> obtenirEvenement(@PathVariable Long id) {
         log.info("GET /evenements/{} - Récupération de l'événement", id);
 
         Optional<Evenement> evenement = evenementService.trouverParId(id);
         return evenement
                 .map(e -> ResponseEntity.ok().body(e))
-                .orElse(ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ErrorResponse("Not Found", "Événement non trouvé avec l'ID: " + id, HttpStatus.NOT_FOUND.value())));
     }
-
-    /**
-     * Récupère tous les événements avec pagination
-     * @param page numéro de la page (défaut: 0)
-     * @param size taille de la page (défaut: 10)
-     * @param sortBy champ de tri (défaut: dateDebut)
-     * @param sortDir direction du tri (défaut: asc)
-     * @return page d'événements
-     */
+*/
     @GetMapping
-    public ResponseEntity<Page<Evenement>> obtenirTousLesEvenements(
+    public ResponseEntity<?> obtenirTousLesEvenements(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "dateDebut") String sortBy,
@@ -92,6 +89,10 @@ public class EvenementController {
         log.info("GET /evenements - Récupération des événements (page: {}, taille: {})", page, size);
 
         try {
+            if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+                throw new IllegalArgumentException("Champ de tri invalide: " + sortBy);
+            }
+
             Sort sort = sortDir.equalsIgnoreCase("desc") ?
                     Sort.by(sortBy).descending() :
                     Sort.by(sortBy).ascending();
@@ -100,20 +101,19 @@ public class EvenementController {
             Page<Evenement> evenements = evenementService.obtenirTousLesEvenements(pageable);
 
             return ResponseEntity.ok(evenements);
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur de validation: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Validation Error", e.getMessage(), HttpStatus.BAD_REQUEST.value()));
         } catch (Exception e) {
-            log.error("Erreur lors de la récupération des événements", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Erreur inattendue lors de la récupération des événements", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
-    /**
-     * Met à jour un événement
-     * @param id l'ID de l'événement à mettre à jour
-     * @param evenement les nouvelles données de l'événement
-     * @return l'événement mis à jour
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<Evenement> mettreAJourEvenement(
+    public ResponseEntity<?> mettreAJourEvenement(
             @PathVariable Long id,
             @Valid @RequestBody Evenement evenement) {
         log.info("PUT /evenements/{} - Mise à jour de l'événement", id);
@@ -123,23 +123,21 @@ public class EvenementController {
             return ResponseEntity.ok(evenementMisAJour);
         } catch (IllegalArgumentException e) {
             log.error("Erreur de validation lors de la mise à jour: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Validation Error", e.getMessage(), HttpStatus.BAD_REQUEST.value()));
         } catch (RuntimeException e) {
             log.error("Erreur lors de la mise à jour de l'événement: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("Not Found", e.getMessage(), HttpStatus.NOT_FOUND.value()));
         } catch (Exception e) {
             log.error("Erreur inattendue lors de la mise à jour de l'événement", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
-    /**
-     * Supprime un événement
-     * @param id l'ID de l'événement à supprimer
-     * @return réponse de suppression
-     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> supprimerEvenement(@PathVariable Long id) {
+    public ResponseEntity<?> supprimerEvenement(@PathVariable Long id) {
         log.info("DELETE /evenements/{} - Suppression de l'événement", id);
 
         try {
@@ -147,37 +145,31 @@ public class EvenementController {
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             log.error("Erreur lors de la suppression de l'événement: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("Not Found", e.getMessage(), HttpStatus.NOT_FOUND.value()));
         } catch (Exception e) {
             log.error("Erreur inattendue lors de la suppression de l'événement", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
-    /**
-     * Recherche des événements par titre
-     * @param titre le titre à rechercher
-     * @return liste des événements correspondants
-     */
-    @GetMapping("/recherche")
-    public ResponseEntity<List<Evenement>> rechercherParTitre(@RequestParam String titre) {
-        log.info("GET /evenements/recherche?titre={} - Recherche par titre", titre);
+    @GetMapping("/search")
+    public ResponseEntity<?> rechercherParTitre(@RequestParam String q) {
+        log.info("GET /evenements/search?q={} - Recherche par titre", q);
 
         try {
-            List<Evenement> evenements = evenementService.rechercherParTitre(titre);
+            List<Evenement> evenements = evenementService.rechercherParTitre(q);
             return ResponseEntity.ok(evenements);
         } catch (Exception e) {
             log.error("Erreur lors de la recherche par titre", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
-    /**
-     * Récupère les événements futurs
-     * @return liste des événements futurs
-     */
     @GetMapping("/futurs")
-    public ResponseEntity<List<Evenement>> obtenirEvenementsFuturs() {
+    public ResponseEntity<?> obtenirEvenementsFuturs() {
         log.info("GET /evenements/futurs - Récupération des événements futurs");
 
         try {
@@ -185,34 +177,31 @@ public class EvenementController {
             return ResponseEntity.ok(evenements);
         } catch (Exception e) {
             log.error("Erreur lors de la récupération des événements futurs", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
-    /**
-     * Récupère les événements par catégorie
-     * @param categorie la catégorie recherchée
-     * @return liste des événements de la catégorie
-     */
     @GetMapping("/categorie/{categorie}")
-    public ResponseEntity<List<Evenement>> obtenirEvenementsParCategorie(@PathVariable String categorie) {
+    public ResponseEntity<?> obtenirEvenementsParCategorie(@PathVariable String categorie) {
         log.info("GET /evenements/categorie/{} - Récupération par catégorie", categorie);
 
         try {
             List<Evenement> evenements = evenementService.obtenirEvenementsParCategorie(categorie);
             return ResponseEntity.ok(evenements);
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur de validation: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Validation Error", e.getMessage(), HttpStatus.BAD_REQUEST.value()));
         } catch (Exception e) {
             log.error("Erreur lors de la récupération par catégorie", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
-    /**
-     * Récupère les événements disponibles (avec des places libres)
-     * @return liste des événements disponibles
-     */
     @GetMapping("/disponibles")
-    public ResponseEntity<List<Evenement>> obtenirEvenementsDisponibles() {
+    public ResponseEntity<?> obtenirEvenementsDisponibles() {
         log.info("GET /evenements/disponibles - Récupération des événements disponibles");
 
         try {
@@ -220,18 +209,13 @@ public class EvenementController {
             return ResponseEntity.ok(evenements);
         } catch (Exception e) {
             log.error("Erreur lors de la récupération des événements disponibles", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
-    /**
-     * Vérifie la disponibilité d'un événement
-     * @param id l'ID de l'événement
-     * @param nombrePlaces le nombre de places demandées
-     * @return true si des places sont disponibles
-     */
     @GetMapping("/{id}/disponibilite")
-    public ResponseEntity<Boolean> verifierDisponibilite(
+    public ResponseEntity<?> verifierDisponibilite(
             @PathVariable Long id,
             @RequestParam Integer nombrePlaces) {
         log.info("GET /evenements/{}/disponibilite?nombrePlaces={}", id, nombrePlaces);
@@ -241,19 +225,17 @@ public class EvenementController {
             return ResponseEntity.ok(disponible);
         } catch (RuntimeException e) {
             log.error("Erreur lors de la vérification de disponibilité: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("Not Found", e.getMessage(), HttpStatus.NOT_FOUND.value()));
         } catch (Exception e) {
             log.error("Erreur inattendue lors de la vérification de disponibilité", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
-    /**
-     * Compte le nombre total d'événements
-     * @return le nombre d'événements
-     */
     @GetMapping("/count")
-    public ResponseEntity<Long> compterEvenements() {
+    public ResponseEntity<?> compterEvenements() {
         log.info("GET /evenements/count - Comptage des événements");
 
         try {
@@ -261,7 +243,8 @@ public class EvenementController {
             return ResponseEntity.ok(nombreEvenements);
         } catch (Exception e) {
             log.error("Erreur lors du comptage des événements", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
@@ -281,7 +264,8 @@ public class EvenementController {
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Erreur lors de la récupération des statistiques", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
@@ -293,21 +277,8 @@ public class EvenementController {
             return ResponseEntity.ok(evenementsActifs);
         } catch (Exception e) {
             log.error("Erreur lors de la récupération des événements actifs", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // Added to match frontend
-    @GetMapping("/search")
-    public ResponseEntity<List<Evenement>> searchEvents(@RequestParam String q) {
-        log.info("GET /evenements/search?q={} - Recherche par titre", q);
-
-        try {
-            List<Evenement> evenements = evenementService.rechercherParTitre(q);
-            return ResponseEntity.ok(evenements);
-        } catch (Exception e) {
-            log.error("Erreur lors de la recherche par titre", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Internal Server Error", "Une erreur inattendue s'est produite", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 }

@@ -50,7 +50,8 @@ public class EvenementDTO {
     private BigDecimal prixPlace;
 
     @NotBlank(message = "La catégorie est obligatoire")
-    @Size(min = 2, max = 50, message = "La catégorie doit contenir entre 2 et 50 caractères")
+    @Pattern(regexp = "CONFERENCE|WORKSHOP|NETWORKING|FORMATION|SEMINAIRE|CONCERT|SPORT|CULTUREL|AUTRE",
+            message = "Catégorie invalide")
     private String categorie;
 
     private String imageUrl;
@@ -63,12 +64,10 @@ public class EvenementDTO {
 
     private Boolean actif;
 
-    // Informations calculées (lecture seule)
     private Integer placesReservees;
     private Integer placesDisponibles;
     private BigDecimal chiffreAffaires;
 
-    // Constructeurs
     public EvenementDTO() {}
 
     public EvenementDTO(Long id, String titre, String description, LocalDateTime dateDebut, LocalDateTime dateFin,
@@ -93,9 +92,6 @@ public class EvenementDTO {
         this.chiffreAffaires = chiffreAffaires;
     }
 
-    /**
-     * Constructeur pour la création (sans ID et sans champs calculés)
-     */
     public EvenementDTO(String titre, String description, LocalDateTime dateDebut, LocalDateTime dateFin,
                         String lieu, Integer capaciteMax, BigDecimal prixPlace, String categorie, String imageUrl) {
         this.titre = titre;
@@ -109,12 +105,6 @@ public class EvenementDTO {
         this.imageUrl = imageUrl;
     }
 
-    /**
-     * Constructeur pour la lecture complète
-     * @see EvenementDTO#EvenementDTO(Long, String, String, LocalDateTime, LocalDateTime, String, Integer, BigDecimal, String, String, LocalDateTime, LocalDateTime, Boolean, Integer, Integer, BigDecimal)
-     */
-
-    // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -163,10 +153,6 @@ public class EvenementDTO {
     public BigDecimal getChiffreAffaires() { return chiffreAffaires; }
     public void setChiffreAffaires(BigDecimal chiffreAffaires) { this.chiffreAffaires = chiffreAffaires; }
 
-    /**
-     * Calcule la durée de l'événement en heures
-     * @return durée en heures
-     */
     public long getDureeEnHeures() {
         if (dateDebut != null && dateFin != null) {
             return java.time.Duration.between(dateDebut, dateFin).toHours();
@@ -174,18 +160,10 @@ public class EvenementDTO {
         return 0;
     }
 
-    /**
-     * Vérifie si l'événement est complet
-     * @return true si complet
-     */
     public boolean isComplet() {
         return placesDisponibles != null && placesDisponibles <= 0;
     }
 
-    /**
-     * Calcule le taux de remplissage en pourcentage
-     * @return taux de remplissage
-     */
     public double getTauxRemplissage() {
         if (capaciteMax != null && placesReservees != null && capaciteMax > 0) {
             return (placesReservees * 100.0) / capaciteMax;

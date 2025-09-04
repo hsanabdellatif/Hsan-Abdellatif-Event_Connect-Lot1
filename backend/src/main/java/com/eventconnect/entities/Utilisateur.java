@@ -1,5 +1,6 @@
 package com.eventconnect.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -10,12 +11,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entité représentant un utilisateur de l'application EventConnect
- *
- * @author EventConnect Team
- * @version 2.0.0
- */
 @Entity
 @Table(name = "utilisateurs")
 public class Utilisateur {
@@ -58,10 +53,9 @@ public class Utilisateur {
     @Column(name = "date_modification")
     private LocalDateTime dateModification;
 
-    @Column(name = "actif")
+    @Column(name = "actif", nullable = false)
     private Boolean actif = true;
 
-    // Système de fidélité
     @Column(name = "points_fidelite")
     private Integer pointsFidelite = 0;
 
@@ -75,9 +69,8 @@ public class Utilisateur {
     @Column(name = "total_evenements_organises")
     private Integer totalEvenementsOrganises = 0;
 
-    // Relations
     @OneToMany(mappedBy = "organisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonIgnore // Changement ici pour éviter la récursion infinie
     private List<Evenement> evenementsOrganises = new ArrayList<>();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -95,17 +88,11 @@ public class Utilisateur {
     )
     private List<Role> roles = new ArrayList<>();
 
-    /**
-     * Méthode appelée avant la mise à jour de l'entité
-     */
     @PreUpdate
     public void preUpdate() {
         this.dateModification = LocalDateTime.now();
     }
 
-    /**
-     * Enum pour les rôles d'utilisateur
-     */
     public enum RoleUtilisateur {
         USER("Utilisateur"),
         ADMIN("Administrateur"),
@@ -122,9 +109,6 @@ public class Utilisateur {
         }
     }
 
-    /**
-     * Enum pour les niveaux de fidélité
-     */
     public enum NiveauFidelite {
         BRONZE("Bronze"),
         ARGENT("Argent"),
@@ -142,23 +126,14 @@ public class Utilisateur {
         }
     }
 
-    /**
-     * Méthode utilitaire pour obtenir le nom complet
-     */
     public String getNomComplet() {
         return this.prenom + " " + this.nom;
     }
 
-    /**
-     * Méthode utilitaire pour vérifier si l'utilisateur est administrateur
-     */
     public boolean isAdmin() {
         return this.role == RoleUtilisateur.ADMIN;
     }
 
-    /**
-     * Méthode utilitaire pour vérifier si l'utilisateur est organisateur
-     */
     public boolean isOrganisateur() {
         return this.role == RoleUtilisateur.ORGANISATEUR || this.role == RoleUtilisateur.ADMIN;
     }
@@ -174,153 +149,43 @@ public class Utilisateur {
     }
 
     // Getters et Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getNom() { return nom; }
+    public void setNom(String nom) { this.nom = nom; }
+    public String getPrenom() { return prenom; }
+    public void setPrenom(String prenom) { this.prenom = prenom; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getMotDePasse() { return motDePasse; }
+    public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
+    public String getTelephone() { return telephone; }
+    public void setTelephone(String telephone) { this.telephone = telephone; }
+    public RoleUtilisateur getRole() { return role; }
+    public void setRole(RoleUtilisateur role) { this.role = role; }
+    public LocalDateTime getDateCreation() { return dateCreation; }
+    public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+    public LocalDateTime getDateModification() { return dateModification; }
+    public void setDateModification(LocalDateTime dateModification) { this.dateModification = dateModification; }
+    public Boolean getActif() { return actif; }
+    public void setActif(Boolean actif) { this.actif = actif; }
+    public List<Evenement> getEvenementsOrganises() { return evenementsOrganises; }
+    public void setEvenementsOrganises(List<Evenement> evenementsOrganises) { this.evenementsOrganises = evenementsOrganises; }
+    public List<Reservation> getReservations() { return reservations; }
+    public void setReservations(List<Reservation> reservations) { this.reservations = reservations; }
+    public List<UtilisateurBadge> getBadges() { return badges; }
+    public void setBadges(List<UtilisateurBadge> badges) { this.badges = badges; }
+    public Integer getPointsFidelite() { return pointsFidelite; }
+    public void setPointsFidelite(Integer pointsFidelite) { this.pointsFidelite = pointsFidelite; }
+    public NiveauFidelite getNiveauFidelite() { return niveauFidelite; }
+    public void setNiveauFidelite(NiveauFidelite niveauFidelite) { this.niveauFidelite = niveauFidelite; }
+    public Integer getTotalReservations() { return totalReservations; }
+    public void setTotalReservations(Integer totalReservations) { this.totalReservations = totalReservations; }
+    public Integer getTotalEvenementsOrganises() { return totalEvenementsOrganises; }
+    public void setTotalEvenementsOrganises(Integer totalEvenementsOrganises) { this.totalEvenementsOrganises = totalEvenementsOrganises; }
+    public List<Role> getRoles() { return roles; }
+    public void setRoles(List<Role> roles) { this.roles = roles; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNom() {
-        return nom;
-    }
-
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
-    public String getPrenom() {
-        return prenom;
-    }
-
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getMotDePasse() {
-        return motDePasse;
-    }
-
-    public void setMotDePasse(String motDePasse) {
-        this.motDePasse = motDePasse;
-    }
-
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public RoleUtilisateur getRole() {
-        return role;
-    }
-
-    public void setRole(RoleUtilisateur role) {
-        this.role = role;
-    }
-
-    public LocalDateTime getDateCreation() {
-        return dateCreation;
-    }
-
-    public void setDateCreation(LocalDateTime dateCreation) {
-        this.dateCreation = dateCreation;
-    }
-
-    public LocalDateTime getDateModification() {
-        return dateModification;
-    }
-
-    public void setDateModification(LocalDateTime dateModification) {
-        this.dateModification = dateModification;
-    }
-
-    public Boolean getActif() {
-        return actif;
-    }
-
-    public void setActif(Boolean actif) {
-        this.actif = actif;
-    }
-
-    public List<Evenement> getEvenementsOrganises() {
-        return evenementsOrganises;
-    }
-
-    public void setEvenementsOrganises(List<Evenement> evenementsOrganises) {
-        this.evenementsOrganises = evenementsOrganises;
-    }
-
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
-    public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
-    }
-
-    public List<UtilisateurBadge> getBadges() {
-        return badges;
-    }
-
-    public void setBadges(List<UtilisateurBadge> badges) {
-        this.badges = badges;
-    }
-
-    public Integer getPointsFidelite() {
-        return pointsFidelite;
-    }
-
-    public void setPointsFidelite(Integer pointsFidelite) {
-        this.pointsFidelite = pointsFidelite;
-    }
-
-    public NiveauFidelite getNiveauFidelite() {
-        return niveauFidelite;
-    }
-
-    public void setNiveauFidelite(NiveauFidelite niveauFidelite) {
-        this.niveauFidelite = niveauFidelite;
-    }
-
-    public Integer getTotalReservations() {
-        return totalReservations;
-    }
-
-    public void setTotalReservations(Integer totalReservations) {
-        this.totalReservations = totalReservations;
-    }
-
-    public Integer getTotalEvenementsOrganises() {
-        return totalEvenementsOrganises;
-    }
-
-    public void setTotalEvenementsOrganises(Integer totalEvenementsOrganises) {
-        this.totalEvenementsOrganises = totalEvenementsOrganises;
-    }
-
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
-    }
-
-    /**
-     * Méthodes utilitaires pour la fidélité
-     */
     public void ajouterPoints(int points) {
         this.pointsFidelite += points;
         this.mettreAJourNiveauFidelite();
