@@ -1,5 +1,6 @@
 package com.eventconnect.dto;
 
+import com.eventconnect.entities.Utilisateur;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -35,15 +36,28 @@ public class UtilisateurDTO {
     @Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")
     private String motDePasse;
 
+    @Size(max = 15, message = "Le téléphone ne peut pas dépasser 15 caractères")
     private String telephone;
+
     private LocalDateTime dateInscription;
     private LocalDateTime dateModification;
     private Boolean actif;
 
+    private Utilisateur.RoleUtilisateur role;
+    private Integer pointsFidelite;
+    private Utilisateur.NiveauFidelite niveauFidelite;
+    private Integer totalReservations;
+    private Integer totalEvenementsOrganises;
+    private Double totalDepense; // Ajout pour correspondre au frontend
+
     // Constructeurs
     public UtilisateurDTO() {}
 
-    public UtilisateurDTO(Long id, String nom, String prenom, String email, String telephone, LocalDateTime dateInscription, LocalDateTime dateModification, Boolean actif) {
+    public UtilisateurDTO(Long id, String nom, String prenom, String email, String telephone,
+                          LocalDateTime dateInscription, LocalDateTime dateModification, Boolean actif,
+                          Utilisateur.RoleUtilisateur role, Integer pointsFidelite,
+                          Utilisateur.NiveauFidelite niveauFidelite, Integer totalReservations,
+                          Integer totalEvenementsOrganises, Double totalDepense) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
@@ -52,6 +66,12 @@ public class UtilisateurDTO {
         this.dateInscription = dateInscription;
         this.dateModification = dateModification;
         this.actif = actif;
+        this.role = role;
+        this.pointsFidelite = pointsFidelite;
+        this.niveauFidelite = niveauFidelite;
+        this.totalReservations = totalReservations;
+        this.totalEvenementsOrganises = totalEvenementsOrganises;
+        this.totalDepense = totalDepense;
     }
 
     /**
@@ -136,5 +156,53 @@ public class UtilisateurDTO {
 
     public void setActif(Boolean actif) {
         this.actif = actif;
+    }
+
+    public Utilisateur.RoleUtilisateur getRole() {
+        return role;
+    }
+
+    public void setRole(Utilisateur.RoleUtilisateur role) {
+        this.role = role;
+    }
+
+    public Integer getPointsFidelite() {
+        return pointsFidelite;
+    }
+
+    public void setPointsFidelite(Integer pointsFidelite) {
+        this.pointsFidelite = pointsFidelite;
+    }
+
+    public Utilisateur.NiveauFidelite getNiveauFidelite() {
+        return niveauFidelite;
+    }
+
+    public void setNiveauFidelite(Utilisateur.NiveauFidelite niveauFidelite) {
+        this.niveauFidelite = niveauFidelite;
+    }
+
+    public Integer getTotalReservations() {
+        return totalReservations;
+    }
+
+    public void setTotalReservations(Integer totalReservations) {
+        this.totalReservations = totalReservations;
+    }
+
+    public Integer getTotalEvenementsOrganises() {
+        return totalEvenementsOrganises;
+    }
+
+    public void setTotalEvenementsOrganises(Integer totalEvenementsOrganises) {
+        this.totalEvenementsOrganises = totalEvenementsOrganises;
+    }
+
+    public Double getTotalDepense() {
+        return totalDepense;
+    }
+
+    public void setTotalDepense(Double totalDepense) {
+        this.totalDepense = totalDepense;
     }
 }

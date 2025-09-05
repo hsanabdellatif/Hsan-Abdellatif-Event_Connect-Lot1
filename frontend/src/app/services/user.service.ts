@@ -4,15 +4,20 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface UtilisateurDto {
-  id?: number;
+id?: number;
   nom: string;
   prenom: string;
   email: string;
+  motDePasse?: string; // Optionnel, utilisé uniquement pour création/modification
   telephone: string;
+  dateInscription?: string; // LocalDateTime sera converti en string ISO
+  dateModification?: string;
   actif: boolean;
-  dateInscription?: string;
-  role?: string;
-  nombreReservations?: number;
+  role: string; // Correspond à RoleUtilisateur (USER, ADMIN, ORGANISATEUR)
+  pointsFidelite?: number;
+  niveauFidelite?: string; // BRONZE, ARGENT, OR, DIAMANT
+  totalReservations?: number;
+  totalEvenementsOrganises?: number;
   totalDepense?: number;
 }
 

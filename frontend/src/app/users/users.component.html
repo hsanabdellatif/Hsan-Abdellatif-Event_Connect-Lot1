@@ -9,7 +9,7 @@
               <i class="material-icons">people</i>
             </div>
             <p class="card-category">Total Utilisateurs</p>
-            <h3 class="card-title">{{ getUsersStats().total }}</h3>
+            <h3 class="card-title">{{ stats.totalUsers || 0 }}</h3>
           </div>
         </div>
       </div>
@@ -20,7 +20,7 @@
               <i class="material-icons">check_circle</i>
             </div>
             <p class="card-category">Utilisateurs Actifs</p>
-            <h3 class="card-title">{{ getUsersStats().actifs }}</h3>
+            <h3 class="card-title">{{ stats.actifs || 0 }}</h3>
           </div>
         </div>
       </div>
@@ -31,7 +31,7 @@
               <i class="material-icons">admin_panel_settings</i>
             </div>
             <p class="card-category">Administrateurs</p>
-            <h3 class="card-title">{{ getUsersStats().admins }}</h3>
+            <h3 class="card-title">{{ stats.admins || 0 }}</h3>
           </div>
         </div>
       </div>
@@ -42,7 +42,7 @@
               <i class="material-icons">euro_symbol</i>
             </div>
             <p class="card-category">Revenus Générés</p>
-            <h3 class="card-title">{{ getUsersStats().revenuTotal | currency:'EUR' }}</h3>
+            <h3 class="card-title">{{ stats.revenuTotal || 0 | currency:'EUR' }}</h3>
           </div>
         </div>
       </div>
@@ -60,17 +60,17 @@
             <div class="row mb-3">
               <div class="col-md-4">
                 <div class="form-group">
-                  <select class="form-control">
+                  <select class="form-control" [(ngModel)]="selectedRole" (change)="onRoleChange($event)">
                     <option value="">Tous les rôles</option>
                     <option value="ADMIN">Administrateurs</option>
-                    <option value="MODERATOR">Modérateurs</option>
+                    <option value="ORGANISATEUR">Organisateurs</option>
                     <option value="USER">Utilisateurs</option>
                   </select>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-group">
-                  <select class="form-control">
+                  <select class="form-control" [(ngModel)]="selectedStatus" (change)="onStatusChange($event)">
                     <option value="">Tous les statuts</option>
                     <option value="true">Actifs</option>
                     <option value="false">Inactifs</option>
@@ -79,11 +79,12 @@
               </div>
               <div class="col-md-4">
                 <div class="form-group">
-                  <input type="text" class="form-control" placeholder="Rechercher par nom ou email...">
+                  <input type="text" class="form-control" placeholder="Rechercher par nom ou email..."
+                         [(ngModel)]="searchTerm" (input)="onSearchChange($event)">
                 </div>
               </div>
             </div>
-            
+
             <div class="table-responsive">
               <table class="table">
                 <thead class="text-primary">
@@ -101,7 +102,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let user of users">
+                  <tr *ngFor="let user of filteredUsers">
                     <td>{{ user.id }}</td>
                     <td>
                       <strong>{{ user.prenom }} {{ user.nom }}</strong>
@@ -110,48 +111,39 @@
                     <td>{{ user.telephone }}</td>
                     <td>{{ user.dateInscription | date:'short' }}</td>
                     <td>
-                      <span class="badge badge-info">{{ user.nombreReservations }}</span>
+                      <span class="badge badge-info">{{ user.nombreReservations || 0 }}</span>
                     </td>
                     <td>
                       <span *ngIf="user.totalDepense > 0">{{ user.totalDepense | currency:'EUR' }}</span>
-                      <span *ngIf="user.totalDepense === 0" class="text-muted">Aucune</span>
+                      <span *ngIf="!user.totalDepense" class="text-muted">Aucune</span>
                     </td>
                     <td>
-                      <span class="badge" 
-                            [ngClass]="'badge-' + getRoleColor(user.role)">
+                      <span class="badge" [ngClass]="'badge-' + getRoleColor(user.role)">
                         {{ getRoleLabel(user.role) }}
                       </span>
                     </td>
                     <td>
-                      <span class="badge" 
-                            [ngClass]="user.actif ? 'badge-success' : 'badge-secondary'">
+                      <span class="badge" [ngClass]="user.actif ? 'badge-success' : 'badge-secondary'">
                         {{ user.actif ? 'Actif' : 'Inactif' }}
                       </span>
                     </td>
                     <td class="td-actions text-right">
-                      <button type="button" 
-                              class="btn btn-info btn-sm" 
-                              matTooltip="Voir réservations"
+                      <button type="button" class="btn btn-info btn-sm" matTooltip="Voir réservations"
                               (click)="viewUserReservations(user.id)">
                         <i class="material-icons">visibility</i>
                       </button>
-                      <button type="button" 
-                              class="btn btn-success btn-sm" 
-                              matTooltip="Éditer"
+                      <button type="button" class="btn btn-success btn-sm" matTooltip="Éditer"
                               (click)="editUser(user.id)">
                         <i class="material-icons">edit</i>
                       </button>
-                      <button type="button" 
-                              [class]="user.actif ? 'btn btn-warning btn-sm' : 'btn btn-success btn-sm'" 
+                      <button type="button"
+                              [class]="user.actif ? 'btn btn-warning btn-sm' : 'btn btn-success btn-sm'"
                               [matTooltip]="user.actif ? 'Désactiver' : 'Activer'"
                               (click)="toggleUserStatus(user.id)">
                         <i class="material-icons">{{ user.actif ? 'block' : 'check_circle' }}</i>
                       </button>
-                      <button type="button" 
-                              *ngIf="user.role !== 'ADMIN'"
-                              class="btn btn-danger btn-sm" 
-                              matTooltip="Supprimer"
-                              (click)="deleteUser(user.id)">
+                      <button type="button" *ngIf="user.role !== 'ADMIN'" class="btn btn-danger btn-sm"
+                              matTooltip="Supprimer" (click)="deleteUser(user.id)">
                         <i class="material-icons">delete</i>
                       </button>
                     </td>
