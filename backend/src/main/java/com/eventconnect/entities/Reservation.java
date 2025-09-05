@@ -1,5 +1,6 @@
 package com.eventconnect.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -8,12 +9,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Entité représentant une réservation d'événement dans l'application EventConnect
- *
- * @author EventConnect Team
- * @version 2.0.1
- */
 @Entity
 @Table(name = "reservations",
         uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "evenement_id"}))
@@ -54,17 +49,19 @@ public class Reservation {
     @Column(length = 500)
     private String commentaire;
 
-    @Column(name = "actif")
+    @Column(name = "actif", nullable = false)
     private Boolean actif = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "utilisateur_id", nullable = false)
     @NotNull(message = "L'utilisateur est obligatoire")
+    @JsonIgnore // Changement pour éviter la récursion
     private Utilisateur utilisateur;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evenement_id", nullable = false)
     @NotNull(message = "L'événement est obligatoire")
+    @JsonIgnore // Changement pour éviter la récursion
     private Evenement evenement;
 
     public Reservation() {}
@@ -92,40 +89,28 @@ public class Reservation {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public Integer getNombrePlaces() { return nombrePlaces; }
     public void setNombrePlaces(Integer nombrePlaces) { this.nombrePlaces = nombrePlaces; }
-
     public BigDecimal getMontantTotal() { return montantTotal; }
     public void setMontantTotal(BigDecimal montantTotal) { this.montantTotal = montantTotal; }
-
     public StatutReservation getStatut() { return statut; }
     public void setStatut(StatutReservation statut) { this.statut = statut; }
-
     public LocalDateTime getDateReservation() { return dateReservation; }
     public void setDateReservation(LocalDateTime dateReservation) { this.dateReservation = dateReservation; }
-
     public LocalDateTime getDateConfirmation() { return dateConfirmation; }
     public void setDateConfirmation(LocalDateTime dateConfirmation) { this.dateConfirmation = dateConfirmation; }
-
     public LocalDateTime getDateAnnulation() { return dateAnnulation; }
     public void setDateAnnulation(LocalDateTime dateAnnulation) { this.dateAnnulation = dateAnnulation; }
-
     public LocalDateTime getDateModification() { return dateModification; }
     public void setDateModification(LocalDateTime dateModification) { this.dateModification = dateModification; }
-
     public String getCodeReservation() { return codeReservation; }
     public void setCodeReservation(String codeReservation) { this.codeReservation = codeReservation; }
-
     public String getCommentaire() { return commentaire; }
     public void setCommentaire(String commentaire) { this.commentaire = commentaire; }
-
     public Boolean getActif() { return actif; }
     public void setActif(Boolean actif) { this.actif = actif; }
-
     public Utilisateur getUtilisateur() { return utilisateur; }
     public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
-
     public Evenement getEvenement() { return evenement; }
     public void setEvenement(Evenement evenement) { this.evenement = evenement; }
 
@@ -183,7 +168,6 @@ public class Reservation {
         if (this.statut == StatutReservation.EN_ATTENTE || this.statut == StatutReservation.CONFIRMEE) {
             this.statut = StatutReservation.ANNULEE;
             this.dateAnnulation = LocalDateTime.now();
-
             if (this.evenement != null) {
                 this.evenement.augmenterPlacesDisponibles(this.nombrePlaces);
             }
@@ -210,7 +194,6 @@ public class Reservation {
         if (peutEtreRemboursee()) {
             this.statut = StatutReservation.REMBOURSEE;
             this.dateModification = LocalDateTime.now();
-
             if (this.evenement != null) {
                 this.evenement.augmenterPlacesDisponibles(this.nombrePlaces);
             }

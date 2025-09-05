@@ -11,7 +11,7 @@ import { LoginComponent } from './auth/login.component';
 import { RegisterComponent } from './auth/register.component';
 import { AuthService } from './services/auth.service';
 import { AuthGuard } from './services/auth.guard';
-
+import { EventFormComponent} from './events/event-form.component';
 @NgModule({
   imports: [
     BrowserAnimationsModule,
@@ -26,7 +26,8 @@ import { AuthGuard } from './services/auth.guard';
     AppComponent,
     AdminLayoutComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    EventFormComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

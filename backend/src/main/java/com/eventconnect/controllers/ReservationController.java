@@ -1,5 +1,6 @@
 package com.eventconnect.controllers;
 
+import com.eventconnect.dto.ErrorResponse;
 import com.eventconnect.dto.ReservationDTO;
 import com.eventconnect.dto.ReservationStats;
 import com.eventconnect.entities.Reservation;
@@ -14,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -302,6 +305,40 @@ public class ReservationController {
         } catch (RuntimeException e) {
             log.error("Erreur lors de la mise à jour: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/stats/historique")
+    public ResponseEntity<?> getHistoricalStats(
+            @RequestParam(defaultValue = "DAILY") String period,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        log.info("GET /reservations/stats/historique - Récupération des statistiques historiques (période: {}, de {} à {})", period, startDate, endDate);
+        try {
+            // Define a formatter that handles ISO 8601 with 'Z'
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+            LocalDateTime start = LocalDateTime.parse(startDate, formatter);
+            LocalDateTime end = LocalDateTime.parse(endDate, formatter);
+            if (period.equalsIgnoreCase("DAILY")) {
+                return ResponseEntity.ok(reservationService.getDailyReservationStats(start, end));
+            } else if (period.equalsIgnoreCase("MONTHLY")) {
+                return ResponseEntity.ok(reservationService.getMonthlyReservationStats(start, end));
+            } else {
+                return ResponseEntity.badRequest()
+                        .body(ErrorResponse.of(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Invalid Period",
+                                "La période doit être DAILY ou MONTHLY",
+                                "/reservations/stats/historique"));
+            }
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération des statistiques historiques", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponse.of(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Internal Server Error",
+                            e.getMessage(),
+                            "/reservations/stats/historique"));
         }
     }
 }

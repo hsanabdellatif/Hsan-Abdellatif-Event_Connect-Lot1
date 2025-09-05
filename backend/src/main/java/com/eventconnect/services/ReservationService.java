@@ -15,8 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Service pour la gestion des réservations
@@ -342,5 +341,35 @@ public class ReservationService {
 
         Integer placesReservees = reservationRepository.countPlacesReserveesForEvenement(evenementId);
         return placesReservees != null ? placesReservees : 0;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getDailyReservationStats(LocalDateTime startDate, LocalDateTime endDate) {
+        log.info("Récupération des statistiques quotidiennes des réservations entre {} et {}", startDate, endDate);
+        List<Object[]> results = reservationRepository.findDailyReservationStats(startDate, endDate);
+        List<Map<String, Object>> stats = new ArrayList<>();
+        for (Object[] result : results) {
+            Map<String, Object> stat = new HashMap<>();
+            stat.put("date", result[0].toString());
+            stat.put("totalRevenue", result[1]);
+            stat.put("totalReservations", result[2]);
+            stats.add(stat);
+        }
+        return stats;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getMonthlyReservationStats(LocalDateTime startDate, LocalDateTime endDate) {
+        log.info("Récupération des statistiques mensuelles des réservations entre {} et {}", startDate, endDate);
+        List<Object[]> results = reservationRepository.findMonthlyReservationStats(startDate, endDate);
+        List<Map<String, Object>> stats = new ArrayList<>();
+        for (Object[] result : results) {
+            Map<String, Object> stat = new HashMap<>();
+            stat.put("month", result[0].toString());
+            stat.put("totalRevenue", result[1]);
+            stat.put("totalReservations", result[2]);
+            stats.add(stat);
+        }
+        return stats;
     }
 }

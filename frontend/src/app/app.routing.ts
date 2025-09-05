@@ -6,7 +6,14 @@ import { LoginComponent } from './auth/login.component';
 import { RegisterComponent } from './auth/register.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { AuthGuard } from './services/auth.guard';
+import { EventFormComponent} from './events/event-form.component';
+import { EventsComponent } from './events/events.component';
+import { ReservationsComponent } from './reservations/reservations.component';
 const routes: Routes =[
+   //{ path: 'events', component: EventsComponent },
+  { path: 'events/create', component: EventFormComponent },
+  { path: 'events/edit/:id', component: EventFormComponent },
+  //{ path: 'events/reservations/:id', component: ReservationsComponent },
   {
     path: '',
     redirectTo: 'login',

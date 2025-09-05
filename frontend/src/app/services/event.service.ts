@@ -1,74 +1,163 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-
-export interface EventDto {
-  id?: number;
-  nom: string;
-  description: string;
-  dateDebut: string;
-  dateFin: string;
-  lieu: string;
-  nombrePlaces: number;
-  prix: number;
-  statut: string;
-  placesReservees?: number;
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventService {
   private apiUrl = `${environment.apiUrl}/evenements`;
+  private utilisateursUrl = `${environment.apiUrl}/utilisateurs`;
 
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    })
-  };
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
-
-  // Récupérer tous les événements
-  getAllEvents(): Observable<EventDto[]> {
-    return this.http.get<EventDto[]>(this.apiUrl);
-  }
-
-  // Récupérer un événement par ID
-  getEventById(id: number): Observable<EventDto> {
-    return this.http.get<EventDto>(`${this.apiUrl}/${id}`);
-  }
-
-  // Créer un nouvel événement
-  createEvent(event: EventDto): Observable<EventDto> {
-    return this.http.post<EventDto>(this.apiUrl, event, this.httpOptions);
-  }
-
-  // Mettre à jour un événement
-  updateEvent(id: number, event: EventDto): Observable<EventDto> {
-    return this.http.put<EventDto>(`${this.apiUrl}/${id}`, event, this.httpOptions);
-  }
-
-  // Supprimer un événement
-  deleteEvent(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  // Rechercher des événements
-  searchEvents(searchTerm: string): Observable<EventDto[]> {
-    return this.http.get<EventDto[]>(`${this.apiUrl}/search?q=${searchTerm}`);
-  }
-
-  // Récupérer les événements actifs
-  getActiveEvents(): Observable<EventDto[]> {
-    return this.http.get<EventDto[]>(`${this.apiUrl}/actifs`);
-  }
-
-  // Récupérer les statistiques des événements
   getEventStats(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/stats`);
+    return this.http.get<any>(`${this.apiUrl}/stats`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getActiveEvents(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/actifs`).pipe(
+      map(events => {
+        if (!Array.isArray(events)) {
+          throw new Error('Les données reçues ne sont pas un tableau');
+        }
+        return events.map(event => {
+          console.log('Événement reçu - Prix:', event.prix, 'Type:', typeof event.prix);
+          return {
+            id: event.id,
+            titre: event.titre || 'Événement sans titre',
+            description: event.description,
+            dateDebut: new Date(event.dateDebut),
+            dateFin: new Date(event.dateFin),
+            placesDisponibles: event.placesDisponibles || 0,
+            capaciteMax: event.placesMax || 0,
+            placesReservees: event.placesReservees || 0,
+            prix: Number(event.prix) || 0,
+            categorie: event.categorie,
+            lieu: event.lieu || 'Lieu non spécifié',
+            statut: event.statut || 'PLANIFIE',
+            imageUrl: event.imageUrl,
+            chiffreAffaires: Number(event.chiffreAffaires) || 0,
+            organisateur: event.organisateur
+          };
+        });
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  searchEvents(searchTerm: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/search?q=${encodeURIComponent(searchTerm)}`).pipe(
+      map(events => {
+        if (!Array.isArray(events)) {
+          throw new Error('Les données reçues ne sont pas un tableau');
+        }
+        return events.map(event => {
+          console.log('Événement reçu - Prix:', event.prix, 'Type:', typeof event.prix);
+          return {
+            id: event.id,
+            titre: event.titre || 'Événement sans titre',
+            description: event.description,
+            dateDebut: new Date(event.dateDebut),
+            dateFin: new Date(event.dateFin),
+            placesDisponibles: event.placesDisponibles || 0,
+            capaciteMax: event.placesMax || 0,
+            placesReservees: event.placesReservees || 0,
+            prix: Number(event.prix) || 0, // Convertir en nombre
+            categorie: event.categorie,
+            lieu: event.lieu || 'Lieu non spécifié',
+            statut: event.statut || 'PLANIFIE',
+            imageUrl: event.imageUrl,
+            chiffreAffaires: Number(event.chiffreAffaires) || 0,
+            organisateur: event.organisateur
+          };
+        });
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  trouverParId(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map(event => {
+        console.log('Événement individuel reçu - Prix:', event.prix, 'Type:', typeof event.prix);
+        return {
+          id: event.id,
+          titre: event.titre || 'Événement sans titre',
+          description: event.description,
+          dateDebut: new Date(event.dateDebut),
+          dateFin: new Date(event.dateFin),
+          placesDisponibles: event.placesDisponibles || 0,
+          capaciteMax: event.placesMax || 0,
+          placesReservees: event.placesReservees || 0,
+          prix: Number(event.prix) || 0,
+          categorie: event.categorie,
+          lieu: event.lieu || 'Lieu non spécifié',
+          statut: event.statut || 'PLANIFIE',
+          imageUrl: event.imageUrl,
+          chiffreAffaires: Number(event.chiffreAffaires) || 0,
+          organisateur: event.organisateur
+        };
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  getOrganisateurs(): Observable<any[]> {
+    return this.http.get<any[]>(this.utilisateursUrl).pipe(
+      map(users => users.map(user => ({
+        id: user.id,
+        nomComplet: user.nomComplet || user.email,
+        email: user.email
+      }))),
+      catchError(this.handleError)
+    );
+  }
+
+  createEvent(event: any): Observable<any> {
+    const { organisateurId, capaciteMax, ...eventData } = event;
+    return this.http.post<any>(`${this.apiUrl}`, eventData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  updateEvent(id: number, event: any): Observable<any> {
+    const { organisateurId, capaciteMax, ...eventData } = event;
+    return this.http.put<any>(`${this.apiUrl}/${id}`, eventData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  deleteEvent(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getEventReservations(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/reservations?evenementId=${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    console.error('Erreur dans EventService:', error);
+    let errorMessage = 'Une erreur inconnue s\'est produite';
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Erreur: ${error.error.message}`;
+    } else {
+      errorMessage = `Code d'erreur: ${error.status}, Message: ${error.message}`;
+      if (error.error && error.error.message) {
+        errorMessage = error.error.message;
+      }
+      if (error.status === 400 && error.error.errors) {
+        errorMessage = error.error.errors.map((err: any) => err.defaultMessage).join('; ');
+      }
+    }
+    return throwError(() => new Error(errorMessage));
   }
 }

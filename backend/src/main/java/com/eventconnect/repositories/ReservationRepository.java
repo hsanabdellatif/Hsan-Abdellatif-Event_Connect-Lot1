@@ -284,4 +284,24 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findReservationsRecentesParUtilisateur(
             @Param("utilisateur") Utilisateur utilisateur,
             @Param("dateDebut") LocalDateTime dateDebut);
+
+    List<Reservation> findByActifTrue();
+
+    List<Reservation> findByUtilisateurId(Long utilisateurId);
+
+    List<Reservation> findByEvenementId(Long evenementId);
+
+    @Query("SELECT r FROM Reservation r WHERE r.dateReservation >= :dateDebut AND r.dateReservation <= :dateFin AND r.actif = true")
+    List<Reservation> findByDateReservationBetween(LocalDateTime dateDebut, LocalDateTime dateFin);
+
+    @Query("SELECT DATE(r.dateReservation) as date, SUM(r.montantTotal) as totalRevenue, COUNT(r) as totalReservations " +
+            "FROM Reservation r WHERE r.dateReservation >= :startDate AND r.dateReservation <= :endDate AND r.actif = true " +
+            "GROUP BY DATE(r.dateReservation)")
+    List<Object[]> findDailyReservationStats(LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("SELECT FUNCTION('MONTH', r.dateReservation) as month, SUM(r.montantTotal) as totalRevenue, COUNT(r) as totalReservations " +
+            "FROM Reservation r WHERE r.dateReservation >= :startDate AND r.dateReservation <= :endDate AND r.actif = true " +
+            "GROUP BY FUNCTION('MONTH', r.dateReservation)")
+    List<Object[]> findMonthlyReservationStats(LocalDateTime startDate, LocalDateTime endDate);
+
 }

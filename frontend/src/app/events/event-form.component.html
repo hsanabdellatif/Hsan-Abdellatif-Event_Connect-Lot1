@@ -1,0 +1,216 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">{{ isEditMode ? 'Modifier Événement' : 'Créer Événement' }}</h4>
+            <p class="card-category">Remplissez les détails de l'événement</p>
+          </div>
+          <div class="card-body">
+            <form #eventForm="ngForm" (ngSubmit)="saveEvent()">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Titre</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="event.titre"
+                      name="titre"
+                      required
+                      minlength="3"
+                      maxlength="100"
+                      #titre="ngModel"
+                    >
+                    <div *ngIf="titre.invalid && (titre.dirty || titre.touched)" class="text-danger">
+                      <div *ngIf="titre.errors?.['required']">Le titre est obligatoire</div>
+                      <div *ngIf="titre.errors?.['minlength']">Le titre doit contenir au moins 3 caractères</div>
+                      <div *ngIf="titre.errors?.['maxlength']">Le titre ne peut pas dépasser 100 caractères</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Lieu</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="event.lieu"
+                      name="lieu"
+                      required
+                      minlength="3"
+                      maxlength="200"
+                      #lieu="ngModel"
+                    >
+                    <div *ngIf="lieu.invalid && (lieu.dirty || lieu.touched)" class="text-danger">
+                      <div *ngIf="lieu.errors?.['required']">Le lieu est obligatoire</div>
+                      <div *ngIf="lieu.errors?.['minlength']">Le lieu doit contenir au moins 3 caractères</div>
+                      <div *ngIf="lieu.errors?.['maxlength']">Le lieu ne peut pas dépasser 200 caractères</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Date de début</label>
+                    <input
+                      type="datetime-local"
+                      class="form-control"
+                      [(ngModel)]="event.dateDebut"
+                      name="dateDebut"
+                      required
+                      #dateDebut="ngModel"
+                    >
+                    <div *ngIf="dateDebut.invalid && (dateDebut.dirty || dateDebut.touched)" class="text-danger">
+                      <div *ngIf="dateDebut.errors?.['required']">La date de début est obligatoire</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Date de fin</label>
+                    <input
+                      type="datetime-local"
+                      class="form-control"
+                      [(ngModel)]="event.dateFin"
+                      name="dateFin"
+                      required
+                      #dateFin="ngModel"
+                    >
+                    <div *ngIf="dateFin.invalid && (dateFin.dirty || dateFin.touched)" class="text-danger">
+                      <div *ngIf="dateFin.errors?.['required']">La date de fin est obligatoire</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Capacité maximale</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      [(ngModel)]="event.capaciteMax"
+                      name="capaciteMax"
+                      required
+                      min="1"
+                      max="10000"
+                      #capaciteMax="ngModel"
+                    >
+                    <div *ngIf="capaciteMax.invalid && (capaciteMax.dirty || capaciteMax.touched)" class="text-danger">
+                      <div *ngIf="capaciteMax.errors?.['required']">La capacité maximale est obligatoire</div>
+                      <div *ngIf="capaciteMax.errors?.['min']">La capacité doit être au moins 1</div>
+                      <div *ngIf="capaciteMax.errors?.['max']">La capacité ne peut pas dépasser 10000</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Prix (€)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      [(ngModel)]="event.prix"
+                      name="prix"
+                      required
+                      min="0"
+                      step="0.01"
+                      #prix="ngModel"
+                    >
+                    <div *ngIf="prix.invalid && (prix.dirty || prix.touched)" class="text-danger">
+                      <div *ngIf="prix.errors?.['required']">Le prix est obligatoire</div>
+                      <div *ngIf="prix.errors?.['min']">Le prix ne peut pas être négatif</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Catégorie</label>
+                    <select
+                      class="form-control"
+                      [(ngModel)]="event.categorie"
+                      name="categorie"
+                      required
+                      #categorie="ngModel"
+                    >
+                      <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                    </select>
+                    <div *ngIf="categorie.invalid && (categorie.dirty || categorie.touched)" class="text-danger">
+                      <div *ngIf="categorie.errors?.['required']">La catégorie est obligatoire</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Organisateur</label>
+                    <select
+                      class="form-control"
+                      [(ngModel)]="event.organisateur.id"
+                      name="organisateurId"
+                      required
+                      #organisateurId="ngModel"
+                    >
+                      <option value="" disabled>Sélectionner un organisateur</option>
+                      <option *ngFor="let org of organisateurs" [value]="org.id">{{ org.nomComplet || org.email }}</option>
+                    </select>
+                    <div *ngIf="organisateurId.invalid && (organisateurId.dirty || organisateurId.touched)" class="text-danger">
+                      <div *ngIf="organisateurId.errors?.['required']">L'organisateur est obligatoire</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Description</label>
+                    <textarea
+                      class="form-control"
+                      [(ngModel)]="event.description"
+                      name="description"
+                      rows="4"
+                      maxlength="1000"
+                      #description="ngModel"
+                    ></textarea>
+                    <div *ngIf="description.invalid && (description.dirty || description.touched)" class="text-danger">
+                      <div *ngIf="description.errors?.['maxlength']">La description ne peut pas dépasser 1000 caractères</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">URL de l'image</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="event.imageUrl"
+                      name="imageUrl"
+                      maxlength="500"
+                      #imageUrl="ngModel"
+                    >
+                    <div *ngIf="imageUrl.invalid && (imageUrl.dirty || imageUrl.touched)" class="text-danger">
+                      <div *ngIf="imageUrl.errors?.['maxlength']">L'URL de l'image ne peut pas dépasser 500 caractères</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="error" class="alert alert-danger" role="alert">
+                {{ error }}
+                <button type="button" class="close" (click)="error = null">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <button type="submit" class="btn btn-primary" [disabled]="eventForm.invalid">Enregistrer</button>
+              <button type="button" class="btn btn-secondary" (click)="cancel()">Annuler</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

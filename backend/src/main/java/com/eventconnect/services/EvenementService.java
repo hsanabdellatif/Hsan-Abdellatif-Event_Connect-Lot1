@@ -1,6 +1,8 @@
 package com.eventconnect.services;
 
+import com.eventconnect.dto.EvenementDTO;
 import com.eventconnect.entities.Evenement;
+import com.eventconnect.entities.Reservation;
 import com.eventconnect.repositories.EvenementRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,18 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Service pour la gestion des événements
- *
- * @author EventConnect Team
- * @version 2.0.0
- */
 @Service
 @Transactional
 public class EvenementService {
@@ -34,21 +30,17 @@ public class EvenementService {
 
     public Evenement creerEvenement(Evenement evenement) {
         log.info("Création d'un nouvel événement: {}", evenement.getTitre());
-
         if (evenement.getDateFin().isBefore(evenement.getDateDebut())) {
             throw new IllegalArgumentException("La date de fin ne peut pas être antérieure à la date de début");
         }
-
         if (evenement.getDateDebut().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("La date de début ne peut pas être dans le passé");
         }
-
         try {
             Evenement.CategorieEvenement.valueOf(evenement.getCategorie().name());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Catégorie invalide: " + evenement.getCategorie());
         }
-
         Evenement nouvelEvenement = evenementRepository.save(evenement);
         log.info("Événement créé avec succès, ID: {}", nouvelEvenement.getId());
         return nouvelEvenement;
@@ -56,16 +48,13 @@ public class EvenementService {
 
     public Evenement mettreAJourEvenement(Long id, Evenement evenementMiseAJour) {
         log.info("Mise à jour de l'événement ID: {}", id);
-
         Evenement evenementExistant = evenementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + id));
-
         try {
             Evenement.CategorieEvenement.valueOf(evenementMiseAJour.getCategorie().name());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Catégorie invalide: " + evenementMiseAJour.getCategorie());
         }
-
         evenementExistant.setTitre(evenementMiseAJour.getTitre());
         evenementExistant.setDescription(evenementMiseAJour.getDescription());
         evenementExistant.setDateDebut(evenementMiseAJour.getDateDebut());
@@ -74,11 +63,11 @@ public class EvenementService {
         evenementExistant.setPlacesMax(evenementMiseAJour.getPlacesMax());
         evenementExistant.setPrix(evenementMiseAJour.getPrix());
         evenementExistant.setCategorie(evenementMiseAJour.getCategorie());
-
+        evenementExistant.setImageUrl(evenementMiseAJour.getImageUrl());
+        evenementExistant.setOrganisateur(evenementMiseAJour.getOrganisateur());
         if (evenementExistant.getDateFin().isBefore(evenementExistant.getDateDebut())) {
             throw new IllegalArgumentException("La date de fin ne peut pas être antérieure à la date de début");
         }
-
         Evenement evenementMisAJour = evenementRepository.save(evenementExistant);
         log.info("Événement mis à jour avec succès, ID: {}", evenementMisAJour.getId());
         return evenementMisAJour;
@@ -128,11 +117,9 @@ public class EvenementService {
 
     public void supprimerEvenement(Long id) {
         log.info("Suppression de l'événement ID: {}", id);
-
         if (!evenementRepository.existsById(id)) {
             throw new RuntimeException("Événement non trouvé avec l'ID: " + id);
         }
-
         evenementRepository.deleteById(id);
         log.info("Événement supprimé avec succès, ID: {}", id);
     }
@@ -140,13 +127,10 @@ public class EvenementService {
     @Transactional(readOnly = true)
     public boolean verifierDisponibilite(Long id, Integer nombrePlaces) {
         log.info("Vérification de disponibilité pour l'événement ID: {}, places demandées: {}", id, nombrePlaces);
-
         Evenement evenement = evenementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Événement non trouvé avec l'ID: " + id));
-
         Integer placesReservees = evenementRepository.countPlacesReserveesParEvenement(id);
         Integer placesDisponibles = evenement.getPlacesMax() - placesReservees;
-
         return placesDisponibles >= nombrePlaces;
     }
 
@@ -156,12 +140,36 @@ public class EvenementService {
     }
 
     @Transactional(readOnly = true)
-    public List<Evenement> getEvenementsActifs() {
+    public List<EvenementDTO> getEvenementsActifs() {
         log.info("Récupération des événements actifs");
-        return evenementRepository.findAll().stream()
-                .filter(e -> e.getActif() &&
-                        e.getStatut() == Evenement.StatutEvenement.PLANIFIE &&
-                        e.getDateDebut().isAfter(LocalDateTime.now()))
-                .collect(Collectors.toList());
+        List<Evenement> evenements = evenementRepository.findEvenementsActifs(Evenement.StatutEvenement.PLANIFIE, LocalDateTime.now());
+        return evenements.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    private EvenementDTO convertToDTO(Evenement evenement) {
+        Integer placesReservees = evenementRepository.countPlacesReserveesParEvenement(evenement.getId());
+        BigDecimal chiffreAffaires = evenement.getReservations().stream()
+                .filter(res -> res.getStatut() == Reservation.StatutReservation.CONFIRMEE)
+                .map(Reservation::getMontantTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new EvenementDTO(
+                evenement.getId(),
+                evenement.getTitre(),
+                evenement.getDescription(),
+                evenement.getDateDebut(),
+                evenement.getDateFin(),
+                evenement.getLieu(),
+                evenement.getPlacesMax(),
+                evenement.getPrix(),
+                evenement.getCategorie().name(),
+                evenement.getImageUrl(),
+                evenement.getDateCreation(),
+                evenement.getDateModification(),
+                evenement.getActif(),
+                placesReservees,
+                evenement.getPlacesDisponibles(),
+                chiffreAffaires
+        );
     }
 }

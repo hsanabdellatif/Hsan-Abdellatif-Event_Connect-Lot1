@@ -1,7 +1,7 @@
 package com.eventconnect.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -86,10 +86,8 @@ public class Evenement {
     private Utilisateur organisateur;
 
     @OneToMany(mappedBy = "evenement", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference("event-reservations")
+    @JsonIgnore // Changement ici pour éviter la récursion infinie
     private List<Reservation> reservations = new ArrayList<>();
-
-    // Constructeurs, getters, setters, et autres méthodes inchangés...
 
     @PrePersist
     public void prePersist() {

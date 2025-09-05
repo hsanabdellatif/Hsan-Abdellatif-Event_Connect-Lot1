@@ -1,20 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-
-export interface ReservationDto {
-  id?: number;
-  utilisateurId: number;
-  evenementId: number;
-  nombrePlaces: number;
-  prixTotal: number;
-  statut: string;
-  dateReservation?: string;
-  utilisateurNom?: string;
-  utilisateurEmail?: string;
-  evenementNom?: string;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -22,66 +10,65 @@ export interface ReservationDto {
 export class ReservationService {
   private apiUrl = `${environment.apiUrl}/reservations`;
 
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json'
-    })
-  };
-
   constructor(private http: HttpClient) { }
 
-  // Récupérer toutes les réservations
-  getAllReservations(): Observable<ReservationDto[]> {
-    return this.http.get<ReservationDto[]>(this.apiUrl);
+  getAllReservations(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl).pipe(
+      map(reservations => {
+        if (!Array.isArray(reservations)) {
+          throw new Error('Les données reçues ne sont pas un tableau');
+        }
+        return reservations.map(reservation => ({
+          id: reservation.id,
+          utilisateur: {
+            nomComplet: reservation.utilisateur?.nomComplet || reservation.utilisateur?.email || 'Utilisateur inconnu',
+            email: reservation.utilisateur?.email || 'N/A'
+          },
+          evenement: {
+            titre: reservation.evenement?.titre || 'Événement inconnu'
+          },
+          statut: reservation.statut || 'EN_ATTENTE',
+          dateReservation: reservation.dateReservation ? new Date(reservation.dateReservation) : new Date(),
+          nombrePlaces: reservation.nombrePlaces || 1,
+          montantTotal: reservation.montantTotal || 0
+        }));
+      }),
+      catchError(this.handleError)
+    );
   }
 
-  // Récupérer une réservation par ID
-  getReservationById(id: number): Observable<ReservationDto> {
-    return this.http.get<ReservationDto>(`${this.apiUrl}/${id}`);
-  }
-
-  // Créer une nouvelle réservation
-  createReservation(reservation: ReservationDto): Observable<ReservationDto> {
-    return this.http.post<ReservationDto>(this.apiUrl, reservation, this.httpOptions);
-  }
-
-  // Mettre à jour une réservation
-  updateReservation(id: number, reservation: ReservationDto): Observable<ReservationDto> {
-    return this.http.put<ReservationDto>(`${this.apiUrl}/${id}`, reservation, this.httpOptions);
-  }
-
-  // Supprimer une réservation
-  deleteReservation(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  // Confirmer une réservation
-  confirmReservation(id: number): Observable<ReservationDto> {
-    return this.http.patch<ReservationDto>(`${this.apiUrl}/${id}/confirmer`, {}, this.httpOptions);
-  }
-
-  // Annuler une réservation
-  cancelReservation(id: number): Observable<ReservationDto> {
-    return this.http.patch<ReservationDto>(`${this.apiUrl}/${id}/annuler`, {}, this.httpOptions);
-  }
-
-  // Récupérer les réservations par événement
-  getReservationsByEvent(eventId: number): Observable<ReservationDto[]> {
-    return this.http.get<ReservationDto[]>(`${this.apiUrl}/evenement/${eventId}`);
-  }
-
-  // Récupérer les réservations par utilisateur
-  getReservationsByUser(userId: number): Observable<ReservationDto[]> {
-    return this.http.get<ReservationDto[]>(`${this.apiUrl}/utilisateur/${userId}`);
-  }
-
-  // Récupérer les réservations par statut
-  getReservationsByStatus(status: string): Observable<ReservationDto[]> {
-    return this.http.get<ReservationDto[]>(`${this.apiUrl}/statut/${status}`);
-  }
-
-  // Récupérer les statistiques des réservations
   getReservationStats(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/stats`);
+    return this.http.get<any>(`${this.apiUrl}/stats`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getHistoricalStats(period: 'DAILY' | 'MONTHLY', startDate: string, endDate: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/stats/historique?period=${period}&startDate=${startDate}&endDate=${endDate}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  confirmerReservation(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/confirmer`, {}).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  annulerReservation(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/annuler`, {}).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    console.error('Erreur dans ReservationService:', error);
+    let errorMessage = 'Une erreur inconnue s\'est produite';
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Erreur: ${error.error.message}`;
+    } else {
+      errorMessage = error.error?.message || `Code d'erreur: ${error.status}, Message: ${error.message}`;
+    }
+    return throwError(() => new Error(errorMessage));
   }
 }

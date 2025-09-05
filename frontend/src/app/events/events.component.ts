@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { EventService } from '../services/event.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-events',
@@ -6,49 +10,90 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./events.component.css']
 })
 export class EventsComponent implements OnInit {
-
   events: any[] = [];
+  loading = true;
+  error: string | null = null;
+  searchTerm = '';
 
-  constructor() { }
+  constructor(private eventService: EventService, private router: Router) {}
 
   ngOnInit(): void {
+    this.loadEvents();
+  }
+
+  loadEvents(): void {
+    this.loading = true;
+    this.error = null;
+    const observable = this.searchTerm
+      ? this.eventService.searchEvents(this.searchTerm)
+      : this.eventService.getActiveEvents();
+
+    observable.pipe(
+      catchError(err => {
+        this.error = 'Erreur lors du chargement des événements : ' + err.message;
+        this.loading = false;
+        return of([]);
+      })
+    ).subscribe(events => {
+      this.events = events;
+      this.loading = false;
+    });
+  }
+
+  searchEvents(term: string): void {
+    this.searchTerm = term;
+    this.loadEvents();
   }
 
   getStatusColor(statut: string): string {
-    switch(statut) {
-      case 'ACTIF': return 'success';
-      case 'COMPLET': return 'warning';
+    switch (statut) {
+      case 'PLANIFIE': return 'success';
+      case 'EN_COURS': return 'info';
+      case 'TERMINE': return 'secondary';
       case 'ANNULE': return 'danger';
+      case 'REPORTE': return 'warning';
       default: return 'info';
     }
   }
 
   getPlacesDisponibles(event: any): number {
-    return event.nombrePlaces - event.placesReservees;
+    return event.placesDisponibles || 0;
+  }
+
+  createEvent(): void {
+    this.router.navigate(['/events/create']);
   }
 
   editEvent(id: number): void {
-    console.log('Éditer événement:', id);
+    this.router.navigate(['/events/edit', id]);
   }
 
   deleteEvent(id: number): void {
-    console.log('Supprimer événement:', id);
+    if (confirm('Voulez-vous vraiment supprimer cet événement ?')) {
+      this.eventService.deleteEvent(id).pipe(
+        catchError(err => {
+          this.error = 'Erreur lors de la suppression de l\'événement : ' + err.message;
+          return of(null);
+        })
+      ).subscribe(() => {
+        this.events = this.events.filter(event => event.id !== id);
+      });
+    }
   }
 
   viewReservations(id: number): void {
-    console.log('Voir réservations pour événement:', id);
+    this.router.navigate(['/events/reservations', id]);
   }
 
-  // Méthodes pour les statistiques
   getTotalReservations(): number {
-    return this.events.reduce((sum, e) => sum + e.placesReservees, 0);
+    return this.events.reduce((sum, e) => sum + (e.placesReservees || 0), 0);
   }
 
   getTotalPlacesDisponibles(): number {
-    return this.events.reduce((sum, e) => sum + (e.nombrePlaces - e.placesReservees), 0);
+    return this.events.reduce((sum, e) => sum + (e.placesDisponibles || 0), 0);
   }
 
   getTotalRevenues(): number {
-    return this.events.reduce((sum, e) => sum + (e.prix * e.placesReservees), 0);
+    return this.events.reduce((sum, e) => sum + (e.chiffreAffaires || 0), 0);
   }
 }

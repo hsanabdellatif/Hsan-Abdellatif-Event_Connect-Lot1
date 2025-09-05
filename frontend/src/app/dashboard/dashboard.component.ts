@@ -1,18 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import * as Chartist from 'chartist';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Chart, registerables } from 'chart.js';
 import { EventService } from '../services/event.service';
 import { UserService } from '../services/user.service';
 import { ReservationService } from '../services/reservation.service';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+// Register Chart.js components
+Chart.register(...registerables);
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
-
+export class DashboardComponent implements OnInit, AfterViewInit {
   dashboardStats: any = {
     totalEvents: 0,
     activeEvents: 0,
@@ -23,118 +25,67 @@ export class DashboardComponent implements OnInit {
   };
   recentEvents: any[] = [];
   recentReservations: any[] = [];
+  dailyStats: any[] = [];
+  monthlyStats: any[] = [];
   loading = true;
   error = '';
+
+  // Reference to chart canvases
+  @ViewChild('dailySalesChart') dailySalesChartElement!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('completedTasksChart') completedTasksChartElement!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('websiteViewsChart') websiteViewsChartElement!: ElementRef<HTMLCanvasElement>;
 
   constructor(
     private eventService: EventService,
     private userService: UserService,
-    private reservationService: ReservationService
+    private reservationService: ReservationService,
+    private cdr: ChangeDetectorRef
   ) { }
-  startAnimationForLineChart(chart){
-      let seq: any, delays: any, durations: any;
-      seq = 0;
-      delays = 80;
-      durations = 500;
 
-      chart.on('draw', function(data) {
-        if(data.type === 'line' || data.type === 'area') {
-          data.element.animate({
-            d: {
-              begin: 600,
-              dur: 700,
-              from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
-              to: data.path.clone().stringify(),
-              easing: Chartist.Svg.Easing.easeOutQuint
-            }
-          });
-        } else if(data.type === 'point') {
-              seq++;
-              data.element.animate({
-                opacity: {
-                  begin: seq * delays,
-                  dur: durations,
-                  from: 0,
-                  to: 1,
-                  easing: 'ease'
-                }
-              });
-          }
-      });
-
-      seq = 0;
-  };
-  startAnimationForBarChart(chart){
-      let seq2: any, delays2: any, durations2: any;
-
-      seq2 = 0;
-      delays2 = 80;
-      durations2 = 500;
-      chart.on('draw', function(data) {
-        if(data.type === 'bar'){
-            seq2++;
-            data.element.animate({
-              opacity: {
-                begin: seq2 * delays2,
-                dur: durations2,
-                from: 0,
-                to: 1,
-                easing: 'ease'
-              }
-            });
-        }
-      });
-
-      seq2 = 0;
-  };
   ngOnInit() {
-    // Charger les statistiques
     this.loadStats();
-    
-    // Charger les événements récents
     this.loadRecentEvents();
-    
-    // Charger les réservations récentes
     this.loadRecentReservations();
+  }
 
-    this.initCharts();
+  ngAfterViewInit() {
+    // Defer chart initialization until data is loaded
   }
 
   private loadStats() {
     this.loading = true;
     this.error = '';
     let loadedCount = 0;
-    const totalLoads = 3;
+    const totalLoads = 4;
 
     const checkLoading = () => {
       loadedCount++;
       if (loadedCount === totalLoads) {
         this.loading = false;
+        this.cdr.detectChanges(); // Ensure DOM is updated
+        this.initCharts();
       }
     };
-    
-    // Charger les statistiques une par une pour mieux gérer les erreurs
+
     this.eventService.getEventStats().pipe(
       catchError(err => {
         console.error('Erreur lors du chargement des stats événements:', err);
-        return of({ totalEvents: 0, activeEvents: 0 });
+        this.error = 'Erreur lors du chargement des statistiques des événements';
+        return of({ total: 0, futurs: 0, disponibles: 0 });
       })
     ).subscribe({
       next: (eventStats) => {
-        this.dashboardStats.totalEvents = eventStats.totalEvents || 0;
-        this.dashboardStats.activeEvents = eventStats.activeEvents || 0;
+        this.dashboardStats.totalEvents = eventStats.total || 0;
+        this.dashboardStats.activeEvents = eventStats.disponibles || 0;
         checkLoading();
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement des stats événements:', error);
-        this.error = 'Erreur lors du chargement des statistiques des événements';
-        checkLoading();
-      }
+      error: () => checkLoading()
     });
 
     this.userService.getUserStats().pipe(
       catchError(err => {
         console.error('Erreur lors du chargement des stats utilisateurs:', err);
+        this.error = 'Erreur lors du chargement des statistiques des utilisateurs';
         return of({ totalUsers: 0 });
       })
     ).subscribe({
@@ -142,144 +93,256 @@ export class DashboardComponent implements OnInit {
         this.dashboardStats.totalUsers = userStats.totalUsers || 0;
         checkLoading();
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement des stats utilisateurs:', error);
-        this.error = 'Erreur lors du chargement des statistiques des utilisateurs';
-        checkLoading();
-      }
+      error: () => checkLoading()
     });
 
     this.reservationService.getReservationStats().pipe(
       catchError(err => {
         console.error('Erreur lors du chargement des stats réservations:', err);
+        this.error = 'Erreur lors du chargement des statistiques des réservations';
         return of({ totalReservations: 0, pendingReservations: 0, totalRevenue: 0 });
       })
     ).subscribe({
       next: (reservationStats) => {
         this.dashboardStats.totalReservations = reservationStats.totalReservations || 0;
-        this.dashboardStats.pendingReservations = reservationStats.pendingReservations || 0;
-        this.dashboardStats.revenue = reservationStats.totalRevenue || 0;
-        this.loading = false;
+        this.dashboardStats.pendingReservations = reservationStats.reservationsEnAttente || 0;
+        this.dashboardStats.revenue = reservationStats.chiffreAffairesTotal || 0;
+        checkLoading();
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement des stats réservations:', error);
-        this.error = 'Erreur lors du chargement des données. Veuillez réessayer plus tard.';
-        this.loading = false;
-      }
+      error: () => checkLoading()
     });
+
+    this.loadHistoricalStats(checkLoading); // Pass the callback
   }
 
   private loadRecentEvents() {
     this.eventService.getActiveEvents().pipe(
       catchError(error => {
         console.error('Erreur lors du chargement des événements récents:', error);
-        this.error = 'Erreur lors du chargement des événements';
+        this.error = 'Erreur lors du chargement des événements récents';
         return of([]);
       })
     ).subscribe(events => {
-      this.recentEvents = events.slice(0, 3).map(event => ({
-        nom: event.titre || 'Sans titre',
-        date: event.dateDebut,
-        reservations: event.placesMax - event.placesDisponibles || 0
-      }));
+      if (Array.isArray(events)) {
+        this.recentEvents = events.slice(0, 3).map(event => ({
+          nom: event.titre || 'Événement sans titre',
+          date: event.dateDebut ? new Date(event.dateDebut) : new Date(),
+          reservations: (event.capaciteMax || 0) - (event.placesDisponibles || 0)
+        }));
+      } else {
+        console.error('Les données reçues ne sont pas un tableau:', events);
+        this.error = 'Erreur de format des données des événements';
+      }
     });
   }
+
   private loadRecentReservations() {
     this.reservationService.getAllReservations().pipe(
       catchError(error => {
         console.error('Erreur lors du chargement des réservations récentes:', error);
-        this.error = 'Erreur lors du chargement des réservations';
+        this.error = 'Erreur lors du chargement des réservations récentes';
         return of([]);
       })
     ).subscribe(reservations => {
-      this.recentReservations = reservations.slice(0, 3).map(reservation => ({
-        utilisateur: reservation.utilisateurNom || 'Utilisateur inconnu',
-        evenement: reservation.evenementNom || 'Événement inconnu',
-        statut: reservation.statut || 'EN_ATTENTE'
-      }));
+      if (Array.isArray(reservations)) {
+        this.recentReservations = reservations.slice(0, 3).map(reservation => ({
+          utilisateur: reservation.utilisateur?.nomComplet || 'Utilisateur inconnu',
+          evenement: reservation.evenement?.titre || 'Événement inconnu',
+          statut: reservation.statut || 'EN_ATTENTE'
+        }));
+      } else {
+        console.error('Les données reçues ne sont pas un tableau:', reservations);
+        this.error = 'Erreur de format des données des réservations';
+      }
+    });
+  }
+
+  private loadHistoricalStats(callback: () => void) {
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+    let historicalLoads = 0;
+    const totalHistoricalLoads = 2;
+
+    const checkHistoricalLoading = () => {
+      historicalLoads++;
+      if (historicalLoads === totalHistoricalLoads) {
+        callback();
+      }
+    };
+
+    this.reservationService.getHistoricalStats('DAILY',
+      sevenDaysAgo.toISOString(),
+      today.toISOString()
+    ).pipe(
+      catchError(error => {
+        console.error('Erreur lors du chargement des stats historiques quotidiennes:', error);
+        this.error = 'Erreur lors du chargement des statistiques historiques';
+        return of([]);
+      })
+    ).subscribe(stats => {
+      this.dailyStats = stats;
+      checkHistoricalLoading();
+    });
+
+    this.reservationService.getHistoricalStats('MONTHLY',
+      startOfYear.toISOString(),
+      today.toISOString()
+    ).pipe(
+      catchError(error => {
+        console.error('Erreur lors du chargement des stats historiques mensuelles:', error);
+        this.error = 'Erreur lors du chargement des statistiques historiques';
+        return of([]);
+      })
+    ).subscribe(stats => {
+      this.monthlyStats = stats;
+      checkHistoricalLoading();
     });
   }
 
   private initCharts() {
-      /* ----------==========     Daily Sales Chart initialization For Documentation    ==========---------- */
+    if (this.error) {
+      console.warn('Charts not initialized due to error state');
+      return;
+    }
 
-      const dataDailySalesChart: any = {
-          labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-          series: [
-              [12, 17, 7, 17, 23, 18, 38]
-          ]
-      };
+    // Ensure canvas elements are available
+    if (!this.dailySalesChartElement || !this.completedTasksChartElement || !this.websiteViewsChartElement) {
+      console.error('Un ou plusieurs éléments de graphique sont introuvables dans le DOM');
+      return;
+    }
 
-     const optionsDailySalesChart: any = {
-          lineSmooth: Chartist.Interpolation.cardinal({
-              tension: 0
-          }),
-          low: 0,
-          high: 50, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: { top: 0, right: 0, bottom: 0, left: 0},
+    // Daily Sales Chart (Line)
+    const dailySalesChart = new Chart(this.dailySalesChartElement.nativeElement, {
+      type: 'line',
+      data: {
+        labels: this.dailyStats.length > 0 ? this.dailyStats.map(stat => stat.date.split('T')[0]) : ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        datasets: [{
+          label: 'Revenus Quotidiens',
+          data: this.dailyStats.length > 0 ? this.dailyStats.map(stat => stat.totalRevenue) : [0, 0, 0, 0, 0, 0, 0],
+          borderColor: '#4caf50',
+          backgroundColor: 'rgba(76, 175, 80, 0.2)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: Math.max(...(this.dailyStats.length > 0 ? this.dailyStats.map(stat => stat.totalRevenue) : [100]), 100) * 1.2
+          }
+        },
+        plugins: {
+          legend: {
+            display: true
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeOutQuint'
+        }
       }
+    });
 
-      var dailySalesChart = new Chartist.Line('#dailySalesChart', dataDailySalesChart, optionsDailySalesChart);
-
-      this.startAnimationForLineChart(dailySalesChart);
-
-
-      /* ----------==========     Completed Tasks Chart initialization    ==========---------- */
-
-      const dataCompletedTasksChart: any = {
-          labels: ['12p', '3p', '6p', '9p', '12p', '3a', '6a', '9a'],
-          series: [
-              [230, 750, 450, 300, 280, 240, 200, 190]
-          ]
-      };
-
-     const optionsCompletedTasksChart: any = {
-          lineSmooth: Chartist.Interpolation.cardinal({
-              tension: 0
-          }),
-          low: 0,
-          high: 1000, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: { top: 0, right: 0, bottom: 0, left: 0}
+    // Completed Tasks Chart (Line)
+    const completedTasksChart = new Chart(this.completedTasksChartElement.nativeElement, {
+      type: 'line',
+      data: {
+        labels: this.dailyStats.length > 0 ? this.dailyStats.map(stat => stat.date.split('T')[0]) : ['12h', '15h', '18h', '21h', '00h', '03h', '06h', '09h'],
+        datasets: [{
+          label: 'Réservations',
+          data: this.dailyStats.length > 0 ? this.dailyStats.map(stat => stat.totalReservations) : [0, 0, 0, 0, 0, 0, 0, 0],
+          borderColor: '#ff9800',
+          backgroundColor: 'rgba(255, 152, 0, 0.2)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: Math.max(...(this.dailyStats.length > 0 ? this.dailyStats.map(stat => stat.totalReservations) : [50]), 50) * 1.2
+          }
+        },
+        plugins: {
+          legend: {
+            display: true
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeOutQuint'
+        }
       }
+    });
 
-      var completedTasksChart = new Chartist.Line('#completedTasksChart', dataCompletedTasksChart, optionsCompletedTasksChart);
-
-      // start animation for the Completed Tasks Chart - Line Chart
-      this.startAnimationForLineChart(completedTasksChart);
-
-
-
-      /* ----------==========     Emails Subscription Chart initialization    ==========---------- */
-
-      var datawebsiteViewsChart = {
-        labels: ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
-        series: [
-          [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895]
-
-        ]
-      };
-      var optionswebsiteViewsChart = {
-          axisX: {
-              showGrid: false
+    // Website Views Chart (Bar)
+    const websiteViewsChart = new Chart(this.websiteViewsChartElement.nativeElement, {
+      type: 'bar',
+      data: {
+        labels: this.monthlyStats.length > 0 ? this.monthlyStats.map(stat => this.getMonthName(stat.month)) : ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+        datasets: [{
+          label: 'Événements Actifs',
+          data: this.monthlyStats.length > 0 ? this.monthlyStats.map(stat => stat.totalReservations) : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          backgroundColor: '#f44336',
+          borderColor: '#f44336',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: Math.max(...(this.monthlyStats.length > 0 ? this.monthlyStats.map(stat => stat.totalReservations) : [50]), 50) * 1.2
           },
-          low: 0,
-          high: 1000,
-          chartPadding: { top: 0, right: 5, bottom: 0, left: 0}
-      };
-      var responsiveOptions: any[] = [
-        ['screen and (max-width: 640px)', {
-          seriesBarDistance: 5,
-          axisX: {
-            labelInterpolationFnc: function (value) {
-              return value[0];
+          x: {
+            grid: {
+              display: false
             }
           }
-        }]
-      ];
-      var websiteViewsChart = new Chartist.Bar('#websiteViewsChart', datawebsiteViewsChart, optionswebsiteViewsChart, responsiveOptions);
-
-      //start animation for the Emails Subscription Chart
-      this.startAnimationForBarChart(websiteViewsChart);
+        },
+        plugins: {
+          legend: {
+            display: true
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeOutQuint'
+        }
+      }
+    });
   }
 
+  private getMonthName(monthNumber: string): string {
+    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+    return months[parseInt(monthNumber) - 1] || 'Inconnu';
+  }
+
+  retryLoading() {
+    this.error = '';
+    this.loading = true;
+    this.dailyStats = [];
+    this.monthlyStats = [];
+    this.recentEvents = [];
+    this.recentReservations = [];
+    this.dashboardStats = {
+      totalEvents: 0,
+      activeEvents: 0,
+      totalUsers: 0,
+      totalReservations: 0,
+      pendingReservations: 0,
+      revenue: 0
+    };
+    this.ngOnInit();
+  }
 }

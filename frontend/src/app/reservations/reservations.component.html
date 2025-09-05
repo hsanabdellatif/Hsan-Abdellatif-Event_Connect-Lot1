@@ -1,7 +1,21 @@
 <div class="main-content">
   <div class="container-fluid">
+    <!-- Loading and Error States -->
+    <div *ngIf="loading && !error" class="text-center py-5">
+      <mat-spinner diameter="50" class="mx-auto"></mat-spinner>
+      <p class="mt-3">Chargement des réservations...</p>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger" role="alert">
+      {{ error }}
+      <button type="button" class="btn btn-sm btn-primary ml-2" (click)="retryLoading()">Réessayer</button>
+      <button type="button" class="close" (click)="error = ''">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
     <!-- Statistiques en haut -->
-    <div class="row">
+    <div class="row" *ngIf="!loading && !error">
       <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="card card-stats">
           <div class="card-header card-header-info card-header-icon">
@@ -49,7 +63,7 @@
     </div>
 
     <!-- Table des réservations -->
-    <div class="row">
+    <div class="row" *ngIf="!loading && !error">
       <div class="col-md-12">
         <div class="card">
           <div class="card-header card-header-primary">
@@ -60,7 +74,7 @@
             <div class="row mb-3">
               <div class="col-md-6">
                 <div class="form-group">
-                  <select class="form-control">
+                  <select class="form-control" [(ngModel)]="selectedStatus" (change)="filterByStatus()">
                     <option value="">Tous les statuts</option>
                     <option value="CONFIRMEE">Confirmées</option>
                     <option value="EN_ATTENTE">En attente</option>
@@ -70,7 +84,7 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <input type="text" class="form-control" placeholder="Rechercher par nom ou email...">
+                  <input type="text" class="form-control" placeholder="Rechercher par nom ou événement..." [(ngModel)]="searchQuery" (input)="searchReservations()">
                 </div>
               </div>
             </div>
@@ -90,21 +104,21 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let reservation of reservations">
+                  <tr *ngFor="let reservation of filteredReservations">
                     <td>{{ reservation.id }}</td>
                     <td>
-                      <strong>{{ reservation.utilisateurNom }}</strong>
+                      <strong>{{ reservation.utilisateur.nomComplet }}</strong>
                       <br>
-                      <small class="text-muted">{{ reservation.utilisateurEmail }}</small>
+                      <small class="text-muted">{{ reservation.utilisateur.email || 'N/A' }}</small>
                     </td>
-                    <td>{{ reservation.evenementNom }}</td>
+                    <td>{{ reservation.evenement.titre }}</td>
                     <td>{{ reservation.dateReservation | date:'short' }}</td>
                     <td>
                       <span class="badge badge-info">{{ reservation.nombrePlaces }}</span>
                     </td>
                     <td>
-                      <span *ngIf="reservation.prixTotal > 0">{{ reservation.prixTotal | currency:'EUR' }}</span>
-                      <span *ngIf="reservation.prixTotal === 0" class="badge badge-success">Gratuit</span>
+                      <span *ngIf="reservation.montantTotal > 0">{{ reservation.montantTotal | currency:'EUR' }}</span>
+                      <span *ngIf="reservation.montantTotal === 0" class="badge badge-success">Gratuit</span>
                     </td>
                     <td>
                       <span class="badge" 
@@ -127,13 +141,16 @@
                         <i class="material-icons">check</i>
                       </button>
                       <button type="button" 
-                              *ngIf="reservation.statut !== 'ANNULEE'"
+                              *ngIf="reservation.statut === 'EN_ATTENTE' || reservation.statut === 'CONFIRMEE'"
                               class="btn btn-danger btn-sm" 
                               matTooltip="Annuler"
                               (click)="cancelReservation(reservation.id)">
                         <i class="material-icons">cancel</i>
                       </button>
                     </td>
+                  </tr>
+                  <tr *ngIf="filteredReservations.length === 0">
+                    <td colspan="8" class="text-center">Aucune réservation disponible</td>
                   </tr>
                 </tbody>
               </table>

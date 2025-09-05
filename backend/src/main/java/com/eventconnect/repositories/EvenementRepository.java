@@ -12,12 +12,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Repository pour l'entité Evenement
- *
- * @author EventConnect Team
- * @version 2.0.0
- */
 @Repository
 public interface EvenementRepository extends JpaRepository<Evenement, Long> {
 
@@ -109,4 +103,7 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
     @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
             "WHERE r.evenement.id = :evenementId AND r.statut = 'CONFIRMEE' AND r.actif = true")
     Integer countPlacesReserveesParEvenement(@Param("evenementId") Long evenementId);
+
+    @Query("SELECT e FROM Evenement e WHERE e.actif = true AND e.statut = :statut AND e.dateDebut > :now")
+    List<Evenement> findEvenementsActifs(@Param("statut") Evenement.StatutEvenement statut, @Param("now") LocalDateTime now);
 }

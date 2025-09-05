@@ -1,7 +1,6 @@
 package com.eventconnect.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -70,11 +69,11 @@ public class Utilisateur {
     private Integer totalEvenementsOrganises = 0;
 
     @OneToMany(mappedBy = "organisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore // Changement ici pour éviter la récursion infinie
+    @JsonIgnore // Changement pour éviter la récursion
     private List<Evenement> evenementsOrganises = new ArrayList<>();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference("user-reservations")
+    @JsonIgnore // Changement pour éviter la récursion
     private List<Reservation> reservations = new ArrayList<>();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -138,7 +137,6 @@ public class Utilisateur {
         return this.role == RoleUtilisateur.ORGANISATEUR || this.role == RoleUtilisateur.ADMIN;
     }
 
-    // Constructeurs
     public Utilisateur() {}
 
     public Utilisateur(String nom, String prenom, String email, String motDePasse) {
@@ -148,7 +146,6 @@ public class Utilisateur {
         this.motDePasse = motDePasse;
     }
 
-    // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNom() { return nom; }
