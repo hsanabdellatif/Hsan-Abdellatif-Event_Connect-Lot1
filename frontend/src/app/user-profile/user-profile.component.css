@@ -1,37 +1,83 @@
+.main-content {
+  padding: 20px;
+}
+
+.container-fluid {
+  max-width: 1200px;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.card-header-primary {
+  background: linear-gradient(60deg, #ab47bc, #8e24aa);
+  color: white;
+  padding: 15px;
+  border-radius: 3px 3px 0 0;
+}
+
+.card-body {
+  padding: 20px;
+}
+
 .stats {
-    padding: 15px 0;
+  padding: 15px 0;
 }
 
 .stat-item {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-    color: #555;
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  color: #555;
 }
 
 .stat-item .material-icons {
-    margin-right: 8px;
-    color: #9c27b0;
+  margin-right: 8px;
+  color: #9c27b0;
 }
 
 .example-full-width {
-    width: 100%;
+  width: 100%;
 }
 
 .card-profile .card-avatar {
-    max-width: 130px;
-    max-height: 130px;
-    margin: -50px auto 0;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+  max-width: 130px;
+  max-height: 130px;
+  margin: -50px auto 0;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.42), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .card-profile .card-avatar img {
-    width: 100%;
-    height: auto;
+  width: 100%;
+  height: auto;
 }
 
 .btn-primary {
-    margin-top: 20px;
+  margin-top: 20px;
+  background-color: #9c27b0;
+  color: white;
+}
+
+.badge-item .card {
+  transition: all 0.3s;
+}
+
+.badge-unlocked {
+  opacity: 0.6;
+}
+
+.card-description.text-gray {
+  color: #999;
+}
+
+.row {
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.col-md-4 {
+  padding: 15px;
 }

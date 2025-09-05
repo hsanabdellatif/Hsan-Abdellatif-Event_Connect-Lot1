@@ -1,109 +1,154 @@
 <div class="main-content">
   <div class="container-fluid">
-                  <div class="card card-profile">
-                  <div class="card-avatar">
-                      <a href="javascript:void(0)">
-                          <img class="img" src="./assets/img/default-avatar.png" />
-                      </a>
-                  </div>
-                  <div class="card-body">
-                      <h6 class="card-category" [ngStyle]="{'color': currentUser?.niveauFidelite?.couleur}">
-                          Niveau {{niveauFidelite}}
-                      </h6>
-                      <h4 class="card-title">{{currentUser?.prenom}} {{currentUser?.nom}}</h4>
-                      <div class="stats">
-                          <div class="stat-item">
-                              <i class="material-icons">star</i>
-                              <span>{{pointsFidelite}} points</span>
-                          </div>
-                          <div class="stat-item">
-                              <i class="material-icons">event</i>
-                              <span>{{totalReservations}} réservations</span>
-                          </div>
-                          <div class="stat-item" *ngIf="currentUser?.role === 'ORGANISATEUR'">
-                              <i class="material-icons">event_note</i>
-                              <span>{{totalEvenementsOrganises}} événements organisés</span>
-                          </div>
-                      </div>
-                  </div>
-              </div>ow">
-          <div class="col-md-8">
-              <div class="card">
-                  <div class="card-header card-header-primary">
-                      <h4 class="card-title">Modifier mon profil</h4>
-                      <p class="card-category">Complétez vos informations personnelles</p>
-                  </div>
-                  <div class="card-body">
-                      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-                          <div class="row">
-                              <div class="col-md-6">
-                                <mat-form-field class="example-full-width">
-                                  <input matInput placeholder="Prénom" formControlName="prenom" type="text" required>
-                                  <mat-error *ngIf="profileForm.get('prenom')?.hasError('required')">
-                                    Le prénom est requis
-                                  </mat-error>
-                                  <mat-error *ngIf="profileForm.get('prenom')?.hasError('minlength')">
-                                    Le prénom doit contenir au moins 2 caractères
-                                  </mat-error>
-                                </mat-form-field>
-                              </div>
-                              <div class="col-md-6">
-                                <mat-form-field class="example-full-width">
-                                  <input matInput placeholder="Nom" formControlName="nom" type="text" required>
-                                  <mat-error *ngIf="profileForm.get('nom')?.hasError('required')">
-                                    Le nom est requis
-                                  </mat-error>
-                                  <mat-error *ngIf="profileForm.get('nom')?.hasError('minlength')">
-                                    Le nom doit contenir au moins 2 caractères
-                                  </mat-error>
-                                </mat-form-field>
-                              </div>
-                          </div>
-                          <div class="row">
-                              <div class="col-md-6">
-                                <mat-form-field class="example-full-width">
-                                  <input matInput placeholder="Email" formControlName="email" type="email" required>
-                                  <mat-error *ngIf="profileForm.get('email')?.hasError('required')">
-                                    L'email est requis
-                                  </mat-error>
-                                  <mat-error *ngIf="profileForm.get('email')?.hasError('email')">
-                                    Veuillez entrer une adresse email valide
-                                  </mat-error>
-                                </mat-form-field>
-                              </div>
-                              <div class="col-md-6">
-                                <mat-form-field class="example-full-width">
-                                  <input matInput placeholder="Téléphone" formControlName="telephone" type="tel">
-                                  <mat-error *ngIf="profileForm.get('telephone')?.hasError('pattern')">
-                                    Veuillez entrer un numéro de téléphone valide
-                                  </mat-error>
-                                </mat-form-field>
-                              </div>
-                          </div>
-                          <button mat-raised-button type="submit" class="btn btn-primary pull-right" [disabled]="!profileForm.valid">
-                            Mettre à jour le profil
-                          </button>
-                          <div class="clearfix"></div>
-                      </form>
-                  </div>
-              </div>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">Modifier mon profil</h4>
+            <p class="card-category">Complétez vos informations personnelles</p>
           </div>
-          <div class="col-md-4">
-              <div class="card card-profile">
+          <div class="card-body">
+            <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+              <div class="row">
+                <div class="col-md-6">
+                  <mat-form-field class="example-full-width">
+                    <input matInput placeholder="Prénom" formControlName="prenom" type="text" required>
+                    <mat-error *ngIf="profileForm.get('prenom')?.hasError('required')">
+                      Le prénom est requis
+                    </mat-error>
+                    <mat-error *ngIf="profileForm.get('prenom')?.hasError('minlength')">
+                      Le prénom doit contenir au moins 2 caractères
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field class="example-full-width">
+                    <input matInput placeholder="Nom" formControlName="nom" type="text" required>
+                    <mat-error *ngIf="profileForm.get('nom')?.hasError('required')">
+                      Le nom est requis
+                    </mat-error>
+                    <mat-error *ngIf="profileForm.get('nom')?.hasError('minlength')">
+                      Le nom doit contenir au moins 2 caractères
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <mat-form-field class="example-full-width">
+                    <input matInput placeholder="Email" formControlName="email" type="email" required>
+                    <mat-error *ngIf="profileForm.get('email')?.hasError('required')">
+                      L'email est requis
+                    </mat-error>
+                    <mat-error *ngIf="profileForm.get('email')?.hasError('email')">
+                      Veuillez entrer une adresse email valide
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field class="example-full-width">
+                    <input matInput placeholder="Téléphone" formControlName="telephone" type="tel">
+                    <mat-error *ngIf="profileForm.get('telephone')?.hasError('pattern')">
+                      Veuillez entrer un numéro de téléphone valide
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              <button mat-raised-button type="submit" class="btn btn-primary pull-right" [disabled]="!profileForm.valid">
+                Mettre à jour le profil
+              </button>
+              <div class="clearfix"></div>
+            </form>
+          </div>
+        </div>
+        <!-- Section Badges -->
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">Mes Badges</h4>
+            <p class="card-category">Vos badges obtenus</p>
+          </div>
+          <div class="card-body">
+            <div *ngIf="badges$ | async as badges; else loading" class="row">
+              <div *ngFor="let badge of badges" class="col-md-4 badge-item">
+                <div class="card card-profile">
                   <div class="card-avatar">
-                      <a href="javascript:void(0)">
-                          <img class="img" src="./assets/img/faces/marc.jpg" />
-                      </a>
+                    <img class="img" [src]="badge.badge.icone || './assets/img/default-badge.png'" alt="{{ badge.badge.nom }}" />
                   </div>
                   <div class="card-body">
-                      <h6 class="card-category text-gray">CEO / Co-Founder</h6>
-                      <h4 class="card-title">Alec Thompson</h4>
-                      <p class="card-description">
-                          Don't be scared of the truth because we need to restart the human foundation in truth And I love you like Kanye loves Kanye I love Rick Owens’ bed design but the back is...
-                      </p>
-                      <a href="javascript:void(0)" class="btn btn-danger btn-round">Follow</a>
+                    <h6 class="card-category" [ngStyle]="{'color': badge.badge.couleur}">{{ badge.badge.type }}</h6>
+                    <h4 class="card-title">{{ badge.badge.nom }}</h4>
+                    <p class="card-description">{{ badge.badge.description }}</p>
+                    <p class="card-description text-gray">Obtenu le {{ badge.dateObtention | date:'shortDate' }}</p>
+                    <p class="card-description text-gray">{{ badge.commentaire }}</p>
                   </div>
+                </div>
               </div>
+              <div *ngIf="badges.length === 0" class="col-md-12">
+                <p>Aucun badge obtenu pour le moment.</p>
+              </div>
+            </div>
           </div>
+        </div>
+        <!-- Section Prochains Badges -->
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">Prochains Badges</h4>
+            <p class="card-category">Badges à atteindre</p>
+          </div>
+          <div class="card-body">
+            <div *ngIf="prochainsBadges$ | async as prochainsBadges; else loading" class="row">
+              <div *ngFor="let badge of prochainsBadges" class="col-md-4 badge-item">
+                <div class="card card-profile badge-unlocked">
+                  <div class="card-avatar">
+                    <img class="img" [src]="badge.icone || './assets/img/default-badge.png'" alt="{{ badge.nom }}" />
+                  </div>
+                  <div class="card-body">
+                    <h6 class="card-category" [ngStyle]="{'color': badge.couleur}">{{ badge.type }}</h6>
+                    <h4 class="card-title">{{ badge.nom }}</h4>
+                    <p class="card-description">{{ badge.description }}</p>
+                    <p class="card-description text-gray">Points requis: {{ badge.pointsRequis }}</p>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="prochainsBadges.length === 0" class="col-md-12">
+                <p>Tous les badges ont été obtenus !</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-template #loading>
+          <p>Chargement...</p>
+        </ng-template>
       </div>
+      <div class="col-md-4">
+        <div class="card card-profile">
+          <div class="card-avatar">
+            <a href="javascript:void(0)">
+              <img class="img" [src]="currentUser?.avatar || './assets/img/default-avatar.png'" />
+            </a>
+          </div>
+          <div class="card-body">
+            <h6 class="card-category" [ngStyle]="{'color': currentUser?.niveauFidelite?.couleur}">
+              Niveau {{niveauFidelite}}
+            </h6>
+            <h4 class="card-title">{{currentUser?.prenom}} {{currentUser?.nom}}</h4>
+            <div class="stats">
+              <div class="stat-item">
+                <i class="material-icons">star</i>
+                <span>{{pointsFidelite}} points</span>
+              </div>
+              <div class="stat-item">
+                <i class="material-icons">event</i>
+                <span>{{totalReservations}} réservations</span>
+              </div>
+              <div class="stat-item" *ngIf="currentUser?.role === 'ORGANISATEUR'">
+                <i class="material-icons">event_note</i>
+                <span>{{totalEvenementsOrganises}} événements organisés</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+</div>

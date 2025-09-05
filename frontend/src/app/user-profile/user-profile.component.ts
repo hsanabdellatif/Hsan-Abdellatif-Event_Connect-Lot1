@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { FideliteService, UtilisateurBadge, Badge } from '../services/fidelite.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-user-profile',
@@ -11,11 +13,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class UserProfileComponent implements OnInit {
   currentUser: any = null;
   profileForm: FormGroup;
+  badges$!: Observable<UtilisateurBadge[]>;
+  prochainsBadges$!: Observable<Badge[]>;
 
   constructor(
     private authService: AuthService,
     private formBuilder: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private fideliteService: FideliteService
   ) {
     this.profileForm = this.formBuilder.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
@@ -34,6 +39,9 @@ export class UserProfileComponent implements OnInit {
         email: this.currentUser.email,
         telephone: this.currentUser.telephone
       });
+      // Charger les données de fidélité
+      this.badges$ = this.fideliteService.getBadgesUtilisateur(this.currentUser.id);
+      this.prochainsBadges$ = this.fideliteService.getProchainsBadges(this.currentUser.id);
     }
   }
 
