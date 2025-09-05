@@ -8,14 +8,25 @@ import { environment } from '../../environments/environment';
 })
 export class AuthService {
   private apiUrl = environment.apiUrl + '/auth';
-  private currentUserSubject: BehaviorSubject<any>;
-  public currentUser: Observable<any>;
+  private currentUserSubject = new BehaviorSubject<any>(null);
+  currentUser: Observable<any> = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.currentUserSubject = new BehaviorSubject<any>(JSON.parse(localStorage.getItem('currentUser') || 'null'));
-    this.currentUser = this.currentUserSubject.asObservable();
+    // Load user from localStorage or API on initialization
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      this.currentUserSubject.next(JSON.parse(storedUser));
+    }
   }
-
+setCurrentUser(user: any): void {
+    if (user && user.id) {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      this.currentUserSubject.next(user);
+    } else {
+      console.error('Invalid user object:', user);
+    }
+  }
+  
   public get currentUserValue() {
     return this.currentUserSubject.value;
   }

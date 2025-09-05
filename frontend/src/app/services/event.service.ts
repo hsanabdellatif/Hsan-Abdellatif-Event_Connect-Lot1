@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -143,7 +143,16 @@ export class EventService {
       catchError(this.handleError)
     );
   }
-
+reserveEvent(eventId: number, token: string): Observable<any> {
+    const payload = {
+      evenementId: eventId,
+      nombrePlaces: 1
+    };
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post('http://localhost:8080/reservations', payload, { headers });
+  }
   private handleError(error: HttpErrorResponse): Observable<never> {
     console.error('Erreur dans EventService:', error);
     let errorMessage = 'Une erreur inconnue s\'est produite';

@@ -12,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -44,16 +46,61 @@ public class ReservationController {
      * @return la réservation créée
      */
     @PostMapping
-    public ResponseEntity<Reservation> creerReservation(@Valid @RequestBody ReservationDTO dto) {
-        log.info("POST /reservations - Création d'une réservation (utilisateur: {}, événement: {}, places: {})",
-                dto.getUtilisateurId(), dto.getEvenementId(), dto.getNombrePlaces());
+    public ResponseEntity<?> creerReservation(@Valid @RequestBody ReservationDTO dto) {
+        log.info("POST /reservations - Création d'une réservation (événement: {}, places: {})",
+                dto.getEvenementId(), dto.getNombrePlaces());
 
         try {
-            Reservation nouvelleReservation = reservationService.creerReservation(dto.getUtilisateurId(), dto.getEvenementId(), dto.getNombrePlaces());
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                        ErrorResponse.of(
+                                HttpStatus.UNAUTHORIZED.value(),
+                                "Unauthorized",
+                                "User must be authenticated",
+                                "/reservations"
+                        )
+                );
+            }
+
+            // Extract user ID from JWT (assuming the principal is the user ID or email)
+            String userEmail = authentication.getName(); // JWT 'sub' claim (email in this case)
+            Long utilisateurId = reservationService.getUserIdByEmail(userEmail);
+            if (utilisateurId == null) {
+                return ResponseEntity.badRequest().body(
+                        ErrorResponse.of(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Invalid User",
+                                "User not found for email: " + userEmail,
+                                "/reservations"
+                        )
+                );
+            }
+
+            Reservation nouvelleReservation = reservationService.creerReservation(
+                    utilisateurId, dto.getEvenementId(), dto.getNombrePlaces()
+            );
             return ResponseEntity.status(HttpStatus.CREATED).body(nouvelleReservation);
         } catch (RuntimeException e) {
             log.error("Erreur lors de la création de la réservation: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(
+                    ErrorResponse.of(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Reservation Creation Failed",
+                            e.getMessage(),
+                            "/reservations"
+                    )
+            );
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors de la création de la réservation: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ErrorResponse.of(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Internal Server Error",
+                            e.getMessage(),
+                            "/reservations"
+                    )
+            );
         }
     }
 

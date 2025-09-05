@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { EventService } from '../services/event.service';
+import { AuthService } from '../services/auth.service'; // Added AuthService
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Router } from '@angular/router';
@@ -14,10 +15,19 @@ export class EventsComponent implements OnInit {
   loading = true;
   error: string | null = null;
   searchTerm = '';
+  currentUser: any = null; // Added to store current user
 
-  constructor(private eventService: EventService, private router: Router) {}
+  constructor(
+    private eventService: EventService,
+    private authService: AuthService, // Added AuthService
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    // Check if user is logged in
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+    });
     this.loadEvents();
   }
 
@@ -83,6 +93,37 @@ export class EventsComponent implements OnInit {
 
   viewReservations(id: number): void {
     this.router.navigate(['/events/reservations', id]);
+  }
+
+  reserveEvent(id: number): void {
+    console.log('Attempting to reserve event, currentUser:', this.currentUser);
+    if (!this.currentUser || !this.currentUser.email || !this.currentUser.token) {
+      console.log('No valid user or token, redirecting to login. currentUser:', this.currentUser);
+      this.error = 'Vous devez être connecté avec un compte valide pour réserver un événement';
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    if (confirm('Voulez-vous réserver cet événement ?')) {
+      console.log('Sending reservation request for event:', id, 'user email:', this.currentUser.email);
+      this.eventService.reserveEvent(id, this.currentUser.token).pipe(
+        catchError(err => {
+          console.error('Reservation error:', err);
+          this.error = err.error?.message || 'Erreur lors de la réservation';
+          return of(null);
+        })
+      ).subscribe(response => {
+        if (response) {
+          this.error = null;
+          const event = this.events.find(e => e.id === id);
+          if (event) {
+            event.placesReservees = (event.placesReservees || 0) + 1;
+            event.placesDisponibles = (event.placesDisponibles || 0) - 1;
+          }
+          alert('Réservation effectuée avec succès !');
+        }
+      });
+    }
   }
 
   getTotalReservations(): number {

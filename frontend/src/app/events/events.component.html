@@ -79,6 +79,13 @@
                     </td>
                     <td class="td-actions text-right">
                       <button type="button" 
+                              class="btn btn-primary btn-sm" 
+                              matTooltip="Réserver"
+                              (click)="reserveEvent(event.id)"
+                              [disabled]="event.statut !== 'PLANIFIE' || getPlacesDisponibles(event) <= 0">
+                        <i class="material-icons">event_seat</i>
+                      </button>
+                      <button type="button" 
                               class="btn btn-info btn-sm" 
                               matTooltip="Voir réservations"
                               (click)="viewReservations(event.id)">

@@ -358,6 +358,11 @@ public class ReservationService {
         return stats;
     }
 
+    public Long getUserIdByEmail(String email) {
+        return utilisateurRepository.findByEmail(email)
+                .map(Utilisateur::getId)
+                .orElse(null);
+    }
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getMonthlyReservationStats(LocalDateTime startDate, LocalDateTime endDate) {
         log.info("Récupération des statistiques mensuelles des réservations entre {} et {}", startDate, endDate);
